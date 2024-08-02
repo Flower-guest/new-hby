@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>乡村千寻多维可视化云平台</title>
+  </head>
+
+  <body>
+    <div id="app"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+    <script>
+      const loadWebPlayerSDK = () => {
+        const s_tag = document.createElement("script"); // 引入播放器js
+        s_tag.type = "text/javascript";
+        s_tag.src =
+          "https://g.alicdn.com/apsara-media-box/imp-web-player/2.16.3/aliplayer-min.js";
+        s_tag.charset = "utf-8";
+        document.body.appendChild(s_tag);
+        const l_tag = document.createElement("link"); // 引入播放器css
+        l_tag.rel = "stylesheet";
+        l_tag.href =
+          "https://g.alicdn.com/apsara-media-box/imp-web-player/2.16.3/skins/default/aliplayer-min.css";
+        document.body.appendChild(l_tag);
+      };
+
+      loadWebPlayerSDK();
+    </script>
+  </body>
+</html>

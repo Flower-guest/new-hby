@@ -1,0 +1,37 @@
+:root {
+  /* 登录页面 */
+  --login-checkbox-color: #2ebdcc;
+  --login-title-color: #fff;
+
+  /* layout页面 */
+  --layout-top-hover-color: #f2feff;
+  --layout-top-active-color: #f2feff;
+  --layout-top-info-color: #cedef8;
+  --layout-slash-bg: #7a7f80;
+
+  /* 面板页面 Plan */
+  --plan-tab-active-bg: #0bb3cc;
+  --plan-list-item-border-color: #5c9099;
+
+  --plan-pagination-btn-bg: #143944;
+  --plan-pagination-btn-border: #2195a8;
+
+  --plan-poppers-bg: #052a32;
+  --plan-poppers-border: #21b3b8;
+  --plan-poppers-item-color: #fff;
+  --plan-poppers-item-bg: #21b3b8;
+
+  /* 菜单页面 */
+  --menu-search-ipt-wrapper-bg: #0d2124;
+  --menu-search-ipt-inner-color: #7ac0cc;
+
+  --menu-menuBox-color: #dae5e6;
+  --menu-activeText-color: #00ffff;
+
+  /* Modal页面 */
+  --modal-row1-bg: #041022;
+  --modal-row2-bg: #052132;
+  --modal-row-font-size: 16px;
+  --modal-row-color: #c8f1f9;
+
+}

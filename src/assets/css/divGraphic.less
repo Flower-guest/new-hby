@@ -1,0 +1,116 @@
+@flag-height: 36px; // 标签高度
+@flag-color: #ccf7ff; // 标签文字颜色
+@flag-size: 20px; // 标签文字大小
+@bubble-flag-bg: #30363d; // 气泡标签背景色和边框颜色
+@triangle-flag-bc: #12B0CC; // 三角标标签边框颜色
+@triangle-flag-color: #ccf7ff; // 三角标标签文字颜色
+// 气泡标签
+.bubble-flag{
+  height: @flag-height;
+  box-sizing: border-box;
+  position: relative;
+  padding: 2px 13px 2px;
+  background: @bubble-flag-bg;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: 1px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 8px 8px 0 8px;
+    border-color: @bubble-flag-bg transparent transparent transparent;
+    left: calc(50% - 8px);
+    transform: translateX(0%) translateY(8px);
+  }
+  .bubble-box{
+    display: flex;
+    align-items: center;
+    img{
+      width: 28px;
+      height: 28px;
+      margin-right: 6px;
+    }
+    span{
+      font-size: @flag-size;
+      color: @flag-color;
+    }
+  }
+}
+// 三角标标签
+.triangle-flag{
+  height: @flag-height;
+  box-sizing: border-box;
+  position: relative;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: 1px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 8px 8px 0 8px;
+    border-color: @triangle-flag-bc transparent transparent transparent;
+    left: calc(50% - 8px);
+    transform: translateX(0%) translateY(8px);
+  }
+  .triangle-box{
+    font-size: @flag-size;
+    color: @flag-color;
+  }
+}
+// 自定义icon点位
+.custom-icon{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  .label {
+    color: #ccf7ff;
+    font-size: 16px;
+    background-color: rgba(4, 24, 34, 0.7);
+    border: 1px solid #707070;
+    padding: 6px;
+    text-align: center;
+  }
+  .custom-box{
+    padding: 4px 4px 15px 4px;
+    margin: 0;
+    color: #fff;
+    width: 38px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url("../img/mk_bg.png") no-repeat;
+    background-size: 100% 100%;
+    .icon{
+      width: 34px;
+      height: 34px;
+      overflow: hidden;
+      border-radius: 50%;
+      img{
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .qj-icon {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 28px;
+      height: 21px;
+    }
+  }
+}

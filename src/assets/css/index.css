@@ -1,0 +1,80 @@
+@import "./var.css";
+@import "../font/font.css";
+
+/* element ElMessageBox 样式 */
+.reset-login {
+  background: #041022;
+  border-radius: 10px 10px 10px 10px;
+  border: 0;
+  width: 550px;
+  height: 250px;
+  box-sizing: border-box;
+}
+.reset-login .el-message-box__header {
+  display: none;
+}
+.reset-login .el-message-box__content {
+  position: relative;
+  height: 103px;
+  margin-top: 40px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.reset-login .el-message-box__content .el-message-box__message {
+  font-size: 22px;
+  color: #888888;
+  margin-top: -18%;
+}
+.reset-login .el-message-box__content .el-message-box__container .el-message-box__status.el-message-box-icon--warning{
+  display:none;
+}
+.reset-login .el-message-box__content::after {
+  content: "";
+  background: url("../img/icon-reset-login.png");
+  background-size: 100% 100%;
+  width: 60px;
+  height: 60px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -25%);
+}
+.login-out .el-message-box__content::after {
+  content: "";
+  background: url("../img/icon-reset-login.png") !important;
+  background-size: 100% 100% !important;
+}
+.reset-login .el-message-box__btns {
+  margin-top: 15px;
+}
+.reset-login .el-message-box__btns .el-button {
+  background: #051932;
+  border-radius: 0px 0px 0px 0px;
+  opacity: 1;
+  border: 1px solid #2179b8;
+}
+
+.login-out .el-message-box__btns {
+  display: flex;
+  justify-content: center;
+}
+
+/* element下拉菜单样式 */
+.poppers {
+  background: #052a32 !important;
+  border-radius: 0px 0px 0px 0px;
+  border: 1px solid #21b3b8 !important;
+}
+
+.poppers .el-select-dropdown__item {
+  color: #fff !important;
+}
+.poppers .el-select-dropdown__item.is-hovering {
+  background-color: #21b3b8 !important;
+}
+.poppers
+  .el-select-dropdown.is-multiple
+  .el-select-dropdown__option-item.is-selected {
+  background-color: #134d58 !important;
+}

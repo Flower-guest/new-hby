@@ -1,0 +1,248 @@
+<template>
+  <!-- 顶部搜索功能 -->
+  <AsyncLocSearch v-model:visible="comVisible.search" />
+  <!-- 划线功能按钮 -->
+  <div class="draw_tool">
+    <template v-for="menuItem in menuVal" :key="menuItem.id">
+      <div class="tool_list" @click="handleToolClick(menuItem)">
+        <img
+          loading="lazy"
+          class="ml-8px w-24px h-24px"
+          :style="{ opacity: menuItem?.image ? 1 : 0 }"
+          :src="getServeImg(menuItem.image)"
+          alt="icon"
+        />
+        <span class="text-18px">{{ menuItem.name }}</span>
+        <img
+          loading="lazy"
+          class="w-14px h-10px"
+          alt="icon"
+          :style="xlStyle(menuItem)"
+          :src="getAssets('icon_xl1.png')"
+        />
+      </div>
+      <!-- <template v-if="menuItem.menuType === 'zsdl'">
+        <div
+          class="menuBox"
+          v-show="shouldShowXL(menuItem) && isActiveMenu(menuItem.id)"
+        >
+          <div
+            v-for="i in menuItem.children"
+            :key="i.id"
+            class="raido"
+            :class="{ activeText: report.id == i.id ? true : false }"
+            @click="handleReportClick(i)"
+          >
+            {{ i.reportName }}
+          </div>
+        </div>
+      </template> -->
+      <!-- <template v-else> -->
+      <!-- 场景切换选项 -->
+      <!-- <AsyncOperateMenu
+        ref="menuRef"
+        v-show="shouldShowXL(menuItem) && isActiveMenu(menuItem.id)"
+        :many-class="menuItem?.manyClass"
+        :multi-select="menuItem.multiSelect"
+        :tool-menu="menuItem.children"
+        @handel-menu="saveActiveMenu"
+      /> -->
+      <AsyncOperateMenu
+        ref="menuRef"
+        v-show="menuItem.childlist.length > 0 && isActiveMenu(menuItem.id)"
+        :event-type="menuItem.event_type"
+        :tool-menu="menuItem.childlist"
+      />
+      <!-- </template> -->
+    </template>
+  </div>
+  <!-- <AsyncCreatePlan ref="createPlanRef" /> -->
+  <!-- 底部分区功能 -->
+  <!-- <AsyncZone ref="zoneRef" /> -->
+  <!-- 招商导览功能 -->
+  <!-- <AsyncReport v-show="report.show" :report-id="report.id" /> -->
+</template>
+
+<script setup lang="ts">
+// import { useToolStore } from "@/store";
+import { getAssets, getServeImg } from "@/utils";
+
+// 异步子组件
+const AsyncLocSearch = defineAsyncComponent(
+  () => import("./components/locSearch/index.vue")
+);
+const AsyncOperateMenu = defineAsyncComponent(
+  () => import("./components/operateMenu/index.vue")
+);
+// const AsyncCreatePlan = defineAsyncComponent(
+//   () => import("./components/createPlan/index.vue")
+// );
+// const AsyncZone = defineAsyncComponent(
+//   () => import("./components/zone/index.vue")
+// );
+// const AsyncReport = defineAsyncComponent(
+//   () => import("./components/invGuide/index.vue")
+// );
+
+interface detailProps {
+  menu: any;
+}
+
+const props = defineProps<detailProps>();
+// const store = useToolStore();
+// const menuRef = ref<InstanceType<typeof AsyncOperateMenu> | null>();
+// const createPlanRef = ref<InstanceType<typeof AsyncCreatePlan> | any>();
+// const zoneRef = ref<InstanceType<typeof AsyncZone> | null>();
+
+// 组件显隐
+const comVisible = reactive({
+  search: false,
+});
+const activeMenu = ref<any>(); //当前点击的按钮
+
+// 招商导览组件
+// const report = reactive<any>({
+//   id: 0,
+//   show: false,
+// });
+
+const menuVal = ref<any>(props.menu);
+
+//监听页面切换执行对应函数
+watch(
+  () => props.menu,
+  (newVal) => {
+    menuVal.value = newVal;
+    tabChange();
+  }
+);
+
+// 当顶部按钮点击切换页面时触发的事件
+const tabChange = () => {
+  //进行数据删除
+  window.cesiumInit.primitiveLoader.deleteFn();
+  window.cesiumInit.divGraphic.deleteDivGraphic();
+  comVisible.search = false; // 隐藏点位搜索框
+  // zoneRef.value?.resetActive(); //重置分区状态
+  // if (createPlanRef.value) createPlanRef.value.showAITool = false;
+};
+
+// 下拉菜单样式
+const xlStyle = computed(() => (item: any) => {
+  const res = activeMenu.value === item.id ? true : false;
+  return {
+    width: "14px",
+    height: "10px",
+    opacity: item.childlist.length > 0 ? 1 : 0,
+    transform: res ? "rotate(0deg)" : "rotate(-90deg)",
+  };
+});
+
+const isActiveMenu = computed(() => (id: string) => activeMenu.value === id);
+
+// tool点击功能
+const handleToolClick = (i) => {
+  activeMenu.value = activeMenu.value == i.id ? "" : i.id; //点击相同取消选中状态
+  // zoneRef.value?.resetActive(); //重置分区状态
+  // if (createPlanRef.value.showAITool) createPlanRef.value.showAITool = false;
+  switch (i.menu_type) {
+    case "locSearch": //位置搜索
+      comVisible.search = !comVisible.search;
+      break;
+    case "sunlightCheck": //日照分析
+      break;
+    case "floodCheck": //淹没分析
+      break;
+    case "panoPoints": //全景点位
+      console.log(i);
+      useLoadData([i.id], [i.jsonurl]);
+      break;
+    case "designCases": //全景设计比对
+      break;
+    case "rankScores": //积分排行榜
+      break;
+      break;
+    case "dualViewSync": //双屏比对
+      break;
+    case "modelFlattener": //模型压平
+      break;
+    case "animateInsight": //汇报动画
+      break;
+  }
+};
+
+// 招商导览点击
+// const handleReportClick = (i) => {
+//   report.id = report.id === i.id ? 0 : i.id;
+//   report.show = report.id ? true : false;
+// };
+
+// 保存当前激活的菜单数据 用于导览的时候对应镜头数据展示
+// const saveActiveMenu = () => {
+//   store.setActiveMenu(menuRef.value);
+// };
+</script>
+
+<style lang="less" scoped>
+.draw_tool {
+  position: absolute;
+  right: 28px;
+  top: 132px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  color: #fff;
+
+  .tool_list {
+    height: 51px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 164px;
+    margin-bottom: 21px;
+    padding: 11px 11px 9px 8px;
+    box-sizing: border-box;
+    cursor: pointer;
+    background: url("@/assets/img/btn-bg.png") no-repeat;
+    background-size: 100% 100%;
+    font-family: "USTitleBlack";
+  }
+}
+.menuBox {
+  margin-top: -24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-sizing: border-box;
+  color: var(--menu-menuBox-color);
+  width: 164px;
+  padding: 14px 14px 8px;
+  background: url("@/assets/img/sugges-list-bg.png") no-repeat;
+  background-size: 100% 100%;
+  margin-bottom: 20px;
+  .raido {
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    padding: 8px 0;
+    font-size: 14px;
+    color: #fff;
+    position: relative;
+    &:hover::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      width: 100%;
+      height: 8px;
+      background: url("@/assets/img/icon_gy.png") no-repeat left center/100%
+        auto;
+    }
+  }
+  .activeText {
+    color: var(--menu-activeText-color) !important;
+  }
+}
+</style>
