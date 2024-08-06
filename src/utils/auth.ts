@@ -83,6 +83,12 @@ export const setProjectData = (projectInfo: any, menu: any, menuData: any) => {
   localCache.setCache(MenuDataKey, menuData);
 };
 
+export const removeProjectData = () => {
+  localCache.deleteCache(ProjectKey);
+  localCache.deleteCache(MenuKey);
+  localCache.deleteCache(MenuDataKey);
+}
+
 // ========== 字典数据 ==========
 const DictKey = ONLY_KEY + "DICT";
 
@@ -92,6 +98,10 @@ export const getDict = () => {
 
 export const setDict = (dict: any) => {
   localCache.setCache(DictKey, dict);
+};
+
+export const removeDict = () => {
+  localCache.deleteCache(DictKey);
 };
 
 // ========== gid ==========

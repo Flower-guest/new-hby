@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import { GetBasicinfo, PostLogin, GetProjectList } from "@/service/api/user";
+import { GetBasicinfo, PostLogin, GetProjectList } from "@/service/api";
 import { type FormInstance, FormRules } from "element-plus";
 import { getServeImg } from "@/utils";
 import * as authUtil from "@/utils/auth";

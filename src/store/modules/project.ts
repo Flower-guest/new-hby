@@ -4,11 +4,11 @@ import {
   removeToken,
   getProject,
   setProjectData,
-  getGid
+  getGid,
+  removeAPPId, removeProjectData, removeDict
 } from "@/utils/auth";
-import { GetUserInterface, LoginOut } from "@/service/api/user";
+import { GetUserInterface, LoginOut } from "@/service/api";
 import { getJson } from "@/utils"
-import localCache from "@/utils/cache";
 
 interface ProjectInfoVO {
   menu: string[];
@@ -61,7 +61,7 @@ export const useProjectStore = defineStore("project", {
     async loginOut() {
       await LoginOut();
       removeToken();
-      localCache.clearCache();
+      removeAPPId(); removeProjectData(); removeDict();
       this.resetState();
     },
 

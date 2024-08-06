@@ -1,19 +1,10 @@
-/*
- * @Author: cxj 1481240653@qq.com
- * @Date: 2024-07-15 16:36:02
- * @LastEditors: cxj 1481240653@qq.com
- * @LastEditTime: 2024-07-31 12:20:25
- * @FilePath: \new-hby\src\service\request\index.ts
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 import axios from "axios";
 import type { AxiosInstance } from "axios";
 import { XJRequestInterceptors, RequestConfig } from "./type";
 import { ElLoading, ElMessage } from "element-plus";
 import { LoadingInstance } from "element-plus/lib/components/loading/src/loading";
 import { errorCode, resultCode, ignoreMsgs, DEFAULT_LOADING } from "./config";
-import localCache from "@/utils/cache";
-import { removeToken } from "@/utils/auth";
+import { removeToken, removeAPPId, removeProjectData, removeDict } from "@/utils/auth";
 
 // 是否显示重新登录
 export const isRelogin = { show: false };
@@ -134,13 +125,13 @@ class Request {
   }
 
   handleAuthorized() {
-    // if (!isRelogin.show) {
-    //   isRelogin.show = true;
-    //   localCache.clearCache();
-    //   removeToken();
-    //   isRelogin.show = false;
-    //   window.location.reload();
-    // }
+    if (!isRelogin.show) {
+      isRelogin.show = true;
+      removeAPPId(); removeProjectData(); removeDict();
+      removeToken();
+      isRelogin.show = false;
+      window.location.reload();
+    }
     return Promise.reject("登录超时,请重新登录!");
   }
 }

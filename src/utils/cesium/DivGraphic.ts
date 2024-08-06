@@ -3,9 +3,8 @@ import { getServeImg } from "@/utils";
 import "@/assets/css/divGraphic.less";
 export default class DivGraphic {
   map3d: any;
-  graphicDivLayer: any; //div图层
+  graphicDivLayer: any; //marker图层
   loading: any;
-  billboard: any; //marker图层
   clusterLayer: any; //聚合图层
   ck: any;
 
@@ -16,18 +15,12 @@ export default class DivGraphic {
   initLayer() {
     this.graphicDivLayer = new window.mars3d.layer.GraphicLayer();
     this.map3d.addLayer(this.graphicDivLayer);
-    // billboard
-    this.billboard = new window.mars3d.layer.GraphicLayer();
-    this.map3d.addLayer(this.billboard);
     this.clusterLayer = null;
   }
   // 添加点位点击事件
   initClick(ck) {
     this.ck = (event) => ck(event); //将回调函数保存避免聚合删掉后不执行事件了
     this.graphicDivLayer.on(window.mars3d.EventType.click, function (event) {
-      ck(event);
-    });
-    this.billboard.on(window.mars3d.EventType.click, function (event) {
       ck(event);
     });
   }
@@ -37,10 +30,10 @@ export default class DivGraphic {
       position: option.position,
       style: {
         html: `
-          <div class="bubble-flag" ${option?.img ? 'style="padding-left:2px"' : ''}>
+          <div class="bubble-flag" ${option.img ? 'style="padding-left:2px"' : ''}>
             <div class="bubble-box">
-              <img ${option?.img ? "" : 'class="hidden"'} src="${option?.img}" />
-              <span ${option?.img ? "" : 'class="mt-4px ml-12px"'}>${option.text}</span>
+              <img ${option.img ? "" : 'class="hidden"'} src="${getServeImg(option.img)}" />
+              <span ${option.img ? "" : 'class="mt-4px ml-12px"'}>${option.text}</span>
             </div>
           </div>`,
         ...this.comData(option, option?.img)
@@ -81,7 +74,7 @@ export default class DivGraphic {
             <div class="icon">
               <img loading="lazy" src="${imgUrl}" alt="花博园图标" />
             </div>
-            <img loading="lazy" ${option.vr ? 'class="qj-icon"' : 'class="hidden qj-icon"'}  src="${qjUrl}" alt="花博园图标" />
+            <img loading="lazy" ${option.vrLink ? 'class="qj-icon"' : 'class="hidden qj-icon"'}  src="${qjUrl}" alt="花博园图标" />
           </div>
         </div>`,
         horizontalOrigin: window.Cesium.HorizontalOrigin.CENTER,
@@ -93,9 +86,8 @@ export default class DivGraphic {
     });
     this.graphicDivLayer.addGraphic(graphic);
   }
-  //添加基本点位
-  addBillboard(option) {
-    // 点聚合
+  //添加聚合点
+  addClusterLayer() {
     if (!this.clusterLayer) {
       this.clusterLayer = new window.mars3d.layer.GraphicLayer({
         clustering: {
@@ -119,27 +111,32 @@ export default class DivGraphic {
         }
       });
     }
+  }
+  //添加基本点位
+  addBillboard(option) {
+    // this.addClusterLayer();
     const graphic = new window.mars3d.graphic.BillboardPrimitive({
       position: option.position,
       attr: option?.attr ?? null,
+      name: option.name,
       style: {
         image: getServeImg(option.img),
-        width: option?.w ?? 47,
-        height: option?.h ?? 52,
+        width: 47,
+        height: 52,
         horizontalOrigin: window.Cesium.HorizontalOrigin.CENTER,
         verticalOrigin: window.Cesium.VerticalOrigin.BOTTOM,
         distanceDisplayCondition: new window.Cesium.DistanceDisplayCondition(0, option?.diFar ?? Number.MAX_VALUE),
-        visibleDepth: option?.isCluster ? true : false, //是否被遮挡
-        clampToGround: !option?.isCluster ? true : false,
+        visibleDepth: option.isCluster, //是否被遮挡
+        clampToGround: !option.isCluster,
         label: option?.text ? this.addLabel(option) : {},
       },
     });
     // 判断是否需要点聚合
-    if (!option?.isCluster) {
-      this.billboard.addGraphic(graphic);
-    } else {
-      this.clusterLayer.addGraphic(graphic);
-    }
+    // if (option.isCluster) {
+    // this.clusterLayer.addGraphic(graphic);
+    // } else {
+    this.graphicDivLayer.addGraphic(graphic);
+    // }
   }
   //添加文本元素
   addLabel(option: any) {
@@ -201,13 +198,6 @@ export default class DivGraphic {
         this.graphicDivLayer.removeGraphic(i);
       });
     }
-    // 删除点数据
-    if (this.billboard.graphics.length > 0) {
-      this.billboard.graphics.forEach((i) => {
-        if (i?.attr?.isForever) return;
-        i.remove();
-      });
-    }
     // 删除点聚合数据
     if (this.clusterLayer) {
       this.clusterLayer.remove();
@@ -232,12 +222,6 @@ export default class DivGraphic {
     // 删除div点数据
     if (this.graphicDivLayer.graphics.length > 0) {
       this.graphicDivLayer.graphics.forEach((i) => {
-        i.setOpacity(type == "hide" ? 0 : 1);
-      });
-    }
-    // 删除点数据
-    if (this.billboard.graphics.length > 0) {
-      this.billboard.graphics.forEach((i) => {
         i.setOpacity(type == "hide" ? 0 : 1);
       });
     }

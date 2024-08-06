@@ -1,6 +1,6 @@
 <template>
   <!-- 顶部搜索功能 -->
-  <AsyncLocSearch v-model:visible="comVisible.search" />
+  <AsyncLocSearch v-model:visible="comVisible.locSearch" />
   <!-- 划线功能按钮 -->
   <div class="draw_tool">
     <template v-for="menuItem in menuVal" :key="menuItem.id">
@@ -40,11 +40,6 @@
       <!-- <template v-else> -->
       <!-- 场景切换选项 -->
       <!-- <AsyncOperateMenu
-        ref="menuRef"
-        v-show="shouldShowXL(menuItem) && isActiveMenu(menuItem.id)"
-        :many-class="menuItem?.manyClass"
-        :multi-select="menuItem.multiSelect"
-        :tool-menu="menuItem.children"
         @handel-menu="saveActiveMenu"
       /> -->
       <AsyncOperateMenu
@@ -56,6 +51,11 @@
       <!-- </template> -->
     </template>
   </div>
+  <!-- 日照分析 -->
+  <AsyncShadow v-model:shadow="comVisible.sunlightCheck" />
+  <!-- 淹没分析 -->
+  <AsyncFlood v-model:flood="comVisible.floodCheck" />
+
   <!-- <AsyncCreatePlan ref="createPlanRef" /> -->
   <!-- 底部分区功能 -->
   <!-- <AsyncZone ref="zoneRef" /> -->
@@ -64,15 +64,16 @@
 </template>
 
 <script setup lang="ts">
-// import { useToolStore } from "@/store";
 import { getAssets, getServeImg } from "@/utils";
 
 // 异步子组件
+const AsyncShadow = defineAsyncComponent(() => import("./Shadow/index.vue"));
+const AsyncFlood = defineAsyncComponent(() => import("./Flood/index.vue"));
 const AsyncLocSearch = defineAsyncComponent(
-  () => import("./components/locSearch/index.vue")
+  () => import("./LocSearch/index.vue")
 );
 const AsyncOperateMenu = defineAsyncComponent(
-  () => import("./components/operateMenu/index.vue")
+  () => import("./OperateMenu/index.vue")
 );
 // const AsyncCreatePlan = defineAsyncComponent(
 //   () => import("./components/createPlan/index.vue")
@@ -89,14 +90,16 @@ interface detailProps {
 }
 
 const props = defineProps<detailProps>();
-// const store = useToolStore();
+
 // const menuRef = ref<InstanceType<typeof AsyncOperateMenu> | null>();
 // const createPlanRef = ref<InstanceType<typeof AsyncCreatePlan> | any>();
 // const zoneRef = ref<InstanceType<typeof AsyncZone> | null>();
 
 // 组件显隐
 const comVisible = reactive({
-  search: false,
+  locSearch: false,
+  sunlightCheck: false,
+  floodCheck: false,
 });
 const activeMenu = ref<any>(); //当前点击的按钮
 
@@ -122,7 +125,9 @@ const tabChange = () => {
   //进行数据删除
   window.cesiumInit.primitiveLoader.deleteFn();
   window.cesiumInit.divGraphic.deleteDivGraphic();
-  comVisible.search = false; // 隐藏点位搜索框
+  comVisible.locSearch = false; // 隐藏点位搜索框
+  comVisible.sunlightCheck = false; // 隐藏点位搜索框
+  comVisible.floodCheck = false; // 隐藏点位搜索框
   // zoneRef.value?.resetActive(); //重置分区状态
   // if (createPlanRef.value) createPlanRef.value.showAITool = false;
 };
@@ -142,27 +147,34 @@ const isActiveMenu = computed(() => (id: string) => activeMenu.value === id);
 
 // tool点击功能
 const handleToolClick = (i) => {
+  console.log(i);
   activeMenu.value = activeMenu.value == i.id ? "" : i.id; //点击相同取消选中状态
+  if (i.menu_type !== "dualViewSync" || !activeMenu.value)
+    window.cesiumInit.split.destroyControl();
   // zoneRef.value?.resetActive(); //重置分区状态
   // if (createPlanRef.value.showAITool) createPlanRef.value.showAITool = false;
   switch (i.menu_type) {
     case "locSearch": //位置搜索
-      comVisible.search = !comVisible.search;
-      break;
     case "sunlightCheck": //日照分析
-      break;
     case "floodCheck": //淹没分析
+      comVisible[i.menu_type] = !comVisible[i.menu_type];
       break;
     case "panoPoints": //全景点位
-      console.log(i);
-      useLoadData([i.id], [i.jsonurl]);
-      break;
-    case "designCases": //全景设计比对
+    case "designCases": //全景设计比对点位
+      if (activeMenu.value) {
+        useLoadData([i.id], [i.jsonurl]);
+        window.cesiumInit.mapEvent.flyToPoint(i.scene_camera);
+      } else {
+        window.cesiumInit.mapEvent.removeLayer(i.id, "id");
+        window.cesiumInit.divGraphic.removeLayer(i.id);
+      }
       break;
     case "rankScores": //积分排行榜
       break;
-      break;
     case "dualViewSync": //双屏比对
+      if (activeMenu.value) {
+        window.cesiumInit.split.createControl(i);
+      }
       break;
     case "modelFlattener": //模型压平
       break;

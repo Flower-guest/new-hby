@@ -1,8 +1,13 @@
 <template>
-  <div class="iframe z-3333" v-show="showIframe">
-    <iframe class="inlineFrameExample w-100% h-100%" :src="toPageUrl"> </iframe>
+  <div class="iframe z-3333" v-show="show">
+    <iframe class="inlineFrameExample w-100% h-100%" :src="pageUrl"> </iframe>
     <div class="i-img">
-      <img loading="lazy" @click="updateShowIframe" :src="getAssets('gb2.png')" alt="关闭"/>
+      <img
+        loading="lazy"
+        @click="updateShow"
+        :src="getAssets('gb2.png')"
+        alt="关闭"
+      />
     </div>
   </div>
 </template>
@@ -10,24 +15,23 @@
 <script setup lang="ts">
 import { getAssets } from "@/utils";
 interface detailProps {
-  showIframe: boolean;
-  toPageUrl: any;
+  show: boolean;
+  pageUrl: any;
 }
-const props = defineProps<detailProps>();
-const showIframe = toRef(props, "showIframe");
-const toPageUrl = ref<any>(props.toPageUrl);
-watch(
-  () => props.toPageUrl,
-  (newValue) => {
-    toPageUrl.value = newValue;
-  }
-);
-const emit = defineEmits(["update:showIframe"]);
-const updateShowIframe = () => {
-  toPageUrl.value = "";
-  emit("update:showIframe", false);
-};
 
+defineProps<detailProps>();
+// const props = defineProps<detailProps>();
+// watch(
+//   () => props.pageUrl,
+//   (newValue) => {
+//     toPageUrl.value = newValue;
+//   }
+// );
+const emit = defineEmits(["update:show"]);
+const updateShow = () => {
+  // toPageUrl.value = "";
+  emit("update:show", false);
+};
 </script>
 
 <style lang="less" scoped>

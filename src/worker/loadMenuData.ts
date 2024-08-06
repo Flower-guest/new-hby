@@ -17,9 +17,11 @@ self.onmessage = async (e) => {
         },
         marker: []
       }
+
       // 循环处理数据
-      data[id].features && data[id].features.forEach((val) => {
+      data[id].jsondata.features && data[id].jsondata.features.forEach((val) => {
         const { geometry } = val;
+        // 处理marker数据
         if (geometry.type === 'Point') {
           const { properties, geometry } = val;
           const markerType = properties?.eventType ? dict[properties.eventType].name : '';
@@ -27,12 +29,13 @@ self.onmessage = async (e) => {
             position: geometry.coordinates,
             id: properties.id,
             name: id,
-            img: properties?.customIcon ?? '',
+            img: properties?.customIcon || data[id].icon || '',
             attr: { ...properties, isForever: isForever ? true : false, markerType },
             text: properties.style.label.text,
             markerType
           });
         } else {
+          // 处理线面数据
           const { properties } = val;
           if (properties?.eventType && dict[properties.eventType].name === 'mask') {
             formatMenuData[id].borderLine.features.push(val)

@@ -3,7 +3,7 @@
     <!-- cesium画布元素 -->
     <div id="cesiumContainer"></div>
     <!-- 全景与卫星切换 -->
-    <div class="vr cursor-pointer" v-show="showVR">
+    <div class="vr cursor-pointer" v-show="visible.vr">
       <div class="relative w-168x h-100%" @click="showWebView(vrTotalUrl)">
         <div class="qjdw">
           <img loading="lazy" :src="getAssets('icon-qjdw.png')" alt="icon" />
@@ -25,25 +25,22 @@
     /> -->
     <AsyncLayout />
     <!-- 表单弹窗 -->
-    <TableInfo
-      :table-info="tableInfo"
-      v-model:show-table="showTable"
+    <LayerInfoDialog
+      :info="layerInfo"
+      v-model:show="visible.layer"
+      @show-web-view="showWebView"
+    />
+    <!-- 人房信息表单弹窗 -->
+    <AsyncPersonModal
+      :info="personInfo"
+      v-model:show="visible.person"
       @show-web-view="showWebView"
     />
     <!-- 设计案例 -->
-    <AsyncDesignModal :design-data="design" v-model:show-design="showDesign" />
-    <!-- 人房信息表单弹窗 -->
-    <AsyncPersonModal
-      :person-prop="personProp"
-      v-model:show-person="showPerson"
-      @show-web-view="showWebView"
-    />
+    <AsyncDesignModal :design-data="design" v-model:show="visible.design" />
     <!-- webview组件 -->
-    <WebViewPage
-      v-if="toPageUrl"
-      :to-page-url="toPageUrl"
-      v-model:show-iframe="showIframe"
-    />
+    <WebViewPage :page-url="pageUrl" v-model:show="visible.webView" />
+
     <!-- 底部经纬度信息 -->
     <div class="location">
       <div class="h-30px w-300px leading-30px text-[#707070] text-16px px-34px">
@@ -54,96 +51,55 @@
 </template>
 
 <script setup lang="ts">
-// import {
-// getPlanningDataManagementOnly,
-// getInvestmentProjects,
-// getAssetManagement,
-// getPanoramicPoint,
-// getMapPoints,
-// getBuiltProjects,
-// } from "@/service/api/admin-api";
-import { getAssets } from "@/utils";
+import { getAssets, getServeImg } from "@/utils";
 import CesiumInit from "@/utils/cesium/CesiumInit";
 
 // 异步子组件
-const AsyncLayout = defineAsyncComponent(
-  () => import("./components/layout.vue")
-);
+const AsyncLayout = defineAsyncComponent(() => import("./Layout/index.vue"));
 const AsyncPersonModal = defineAsyncComponent(
-  () => import("./components/modal/personModal.vue")
+  () => import("./PersonModal/index.vue")
 );
 const AsyncDesignModal = defineAsyncComponent(
-  () => import("./components/modal/designModal.vue")
+  () => import("./DesignModal.vue")
 );
 
-// const message = useMessage();
-
-const showTable = ref<boolean>(false); //是否展示表单
-const showPerson = ref<boolean>(false); //是否展示人房信息表单
-const showIframe = ref<boolean>(false); //是否显示iframe
-const showDesign = ref<boolean>(false); //是否显示设计图
-const showVR = ref<boolean>(true);
 const design = ref<any>();
-const toPageUrl = ref<any>(); //跳转全景默认地址
-const personProp = ref<number>(0); //点击的人房信息fnum 用来进行数据查询
-const tableInfo = ref<any>(); //点击建筑物table数据
+const pageUrl = ref<any>(); //跳转全景默认地址
+const layerInfo = ref<any>(); //点击图层详情信息弹窗
+const personInfo = ref<any>(); //点击的人房信息弹窗
+const visible = reactive({
+  layer: false,
+  webView: false,
+  person: false,
+  design: false,
+  vr: false,
+});
 
-let // divGraphic,
-  vrTotalUrl;
-
-//     vrTotalUrl = initData.vrUrl;
-//     // 添加面点击事件
-//     cesium.primitiveLoader.initClick((event) => billboardClick(event));
-//   });
-// };
+let vrTotalUrl;
 
 // billboard点击事件
 const billboardClick = async (event) => {
   const attr = event.graphic.attr;
+  console.log(attr);
   switch (attr?.markerType) {
-    case "pano":
-      console.log(attr);
-      // showWebView(attr.url);
+    case "pano": //全景点位
+      showWebView(attr.vrLink);
       break;
-    case "design":
-      console.log(attr);
-      // showWebView(attr.url);
+    case "design": //全景设计比对
+      visible.design = true;
+      design.value = { img: getServeImg(attr.designImg), url: attr.vrLink };
       break;
-    case "houseInfo":
-      console.log(attr);
-      // showWebView(attr.url);
+    case "hot": //景点点位
+    case "asset": //资产点位
+    case "investment": //招商点位
+    case "build": //建设点位
+      handelLayer(attr);
+      break;
+    case "houseInfoBuild": //人房信息楼栋
+    case "houseInfoHold": //人房信息户
+      handelLayer(attr, "personInfo");
       break;
   }
-  // if (!attr || attr.markerType === "bq") return;
-  // const tableInfoFetch = async (fetchFn) => {
-  //   const res = await fetchFn({ fnum: attr.fnum });
-  //   if (res.length < 1) {
-  //     message.warning("暂未查询到该信息！");
-  //   } else {
-  //     showInfoTable({ ...res[0], markerType: attr.markerType }, "showTable");
-  //   }
-  // };
-  // const actions = {
-  //   rfxx: () =>
-  //     showInfoTable({ fnum: attr.fnum, dataName: attr.dataName }, "showPerson"),
-  //   qjdw: async () => {
-  //     const url =
-  //       attr.url ||
-  //       ((await getPanoramicPoint({ fnum: attr.fnum })) as any)[0]
-  //         .panoramicServiceAddress;
-  //     showWebView(url);
-  //   },
-  //   sjal: () => {
-  //     showDesign.value = true;
-  //     design.value = attr.name;
-  //   },
-  //   rd: () => tableInfoFetch(getMapPoints),
-  //   js: () => tableInfoFetch(getBuiltProjects),
-  //   zc: () => tableInfoFetch(getAssetManagement),
-  //   default: () => tableInfoFetch(getInvestmentProjects),
-  // };
-  // const action = actions[attr.markerType] || actions.default;
-  // await action();
 };
 
 // tabelInfo显示与内容替换
@@ -157,24 +113,23 @@ const billboardClick = async (event) => {
 //   }
 // };
 
-// 模型点击\marker点点击 展示表单 info:点击模型返回的信息  type：事件类型
-// const showInfoTable = (info, type) => {
-//   //如果在使用划线功能就不展示弹窗
-//   switch (type) {
-//     case "showTable":
-//       showTable.value = true;
-//       tableInfo.value = info;
-//       break;
-//     case "showPerson":
-//       showPerson.value = true;
-//       personProp.value = info;
-//       break;
-//   }
-// };
+// 图层点击事件 展示表单 info:点击的图层数据  type：事件类型
+const handelLayer = (info, type = "layerInfo") => {
+  switch (type) {
+    case "layerInfo":
+      visible.layer = true;
+      layerInfo.value = info;
+      break;
+    case "personInfo":
+      visible.person = true;
+      personInfo.value = info;
+      break;
+  }
+};
 
 const showWebView = (url) => {
-  toPageUrl.value = url || vrTotalUrl;
-  showIframe.value = true;
+  pageUrl.value = url || vrTotalUrl;
+  visible.webView = true;
 };
 
 onMounted(() => {
@@ -238,19 +193,6 @@ onMounted(() => {
     font-weight: 400;
     color: #ffffff;
     border-radius: 4px 0px 4px 0px;
-  }
-}
-.weather {
-  position: absolute;
-  top: 80px;
-  right: 28px;
-  display: flex;
-  color: #fff;
-  div {
-    padding: 8px;
-    margin-left: 8px;
-    border-radius: 18px;
-    background-color: rgba(12, 183, 189, 0.4);
   }
 }
 </style>

@@ -164,8 +164,8 @@ const userLoginOut = () => {
     customClass: "reset-login login-out",
   })
     .then(async () => {
-      replace("/login?redirect=/index&gid=" + getGid());
       await loginOut();
+      replace("/login?redirect=/index&gid=" + getGid());
       window.location.href = window.location.href;
     })
     .catch(() => {});

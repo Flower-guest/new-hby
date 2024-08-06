@@ -1,3 +1,11 @@
+/*
+ * @Author: cxj 1481240653@qq.com
+ * @Date: 2024-07-15 16:36:02
+ * @LastEditors: cxj 1481240653@qq.com
+ * @LastEditTime: 2024-08-05 17:58:36
+ * @FilePath: \new-hby\src\hooks\useLoadData.ts
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import { getMenuData, getDict } from "@/utils/auth";
 import { ElLoading } from "element-plus";
 
@@ -9,6 +17,7 @@ export const useLoadData = async (checkMenuArr: any = [], jsonUrl: any = []) => 
     const divLayer = window.cesiumInit.divGraphic.graphicDivLayer.getGraphicsByAttr(id, 'name');
     if (layers.length < 1 && divLayer.length < 1) noHaveLayerId.push(id);
   })
+
   workerFormat(getMenuData(), noHaveLayerId, false, jsonUrl)
 };
 
@@ -44,14 +53,17 @@ export const workerFormat = (data: any, checkMenuArr: any = [], isForever = fals
             switch (val.markerType) {
               case "bubbleFlag": divGraphic.bubbleFlag(val); break;
               case "triangleFlag": divGraphic.triangleFlag(val); break;
-              case "pano" || "design" || "houseInfo": divGraphic.addBillboard(val);; break;
+              case "pano":
+              case "design":
+              case "houseInfo":
+                divGraphic.addBillboard({ ...val, clusterLayer: marker.length > 50 }); break;
               default: divGraphic.customIcon(val); break;
             }
           }
         });
 
         // 加载面和线
-        lineAndPolygon.features.length > 0 && primitiveLoader.addGeoJsonLayer({ id, data: lineAndPolygon })
+        lineAndPolygon.features.length > 0 && primitiveLoader.addGeoJsonLayer({ id, data: lineAndPolygon, isForever })
 
         // 加载边界线
         isForever && primitiveLoader.addGeoJsonLayer({
@@ -61,6 +73,7 @@ export const workerFormat = (data: any, checkMenuArr: any = [], isForever = fals
               fill: true,
               color: "rgb(0,0,0)",
               opacity: 0.6,
+              global: false,
             }
           }
         });

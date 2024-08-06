@@ -56,7 +56,7 @@ export const map3dConfig: any = {
   },
   basemaps: [
     {
-      id: 10,
+      id: 10000,
       name: "地图底图",
       type: "group",
       templateValues: {
@@ -68,7 +68,7 @@ export const map3dConfig: any = {
       zIndex: 0,
     },
     {
-      id: 21,
+      id: 10001,
       name: "ArcGIS影像",
       icon: "https://vill.fantere.com/img/esriWorldImagery.png",
       type: "arcgis",
@@ -77,7 +77,7 @@ export const map3dConfig: any = {
       show: true,
     },
     {
-      id: 2021,
+      id: 10002,
       pid: 10,
       name: "谷歌影像",
       icon: "https://vill.fantere.com/img/google_img.png",
@@ -92,7 +92,7 @@ export const map3dConfig: any = {
       zIndex: 1,
     },
     {
-      id: 1,
+      id: 10003,
       name: "天地图影像",
       icon: "https://vill.fantere.com/img/tdt_img.png",
       type: "tdt",
@@ -105,7 +105,7 @@ export const map3dConfig: any = {
       icon: "https://demo.fantere.com/img/bd-vec.png",
       type: "baidu",
       layer: "vec",
-      id: 15,
+      id: 10004,
       templateValues: {
         dataServer: "//data.mars3d.cn",
         gltfServerUrl: "//data.mars3d.cn/gltf",
@@ -115,7 +115,7 @@ export const map3dConfig: any = {
     },
     {
       id: 2017,
-      pid: 10,
+      pid: 10005,
       name: "暗色底图",
       type: "gaode",
       icon: "https://demo.fantere.com/img/blackMarble.png",
@@ -142,7 +142,7 @@ export const map3dConfig: any = {
       url: "https://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}",
       chinaCRS: "GCJ02",
       enablePickFeatures: false,
-      id: 23,
+      id: 10006,
       templateValues: {
         dataServer: "//data.mars3d.cn",
         gltfServerUrl: "//data.mars3d.cn/gltf",
@@ -157,7 +157,7 @@ export const map3dConfig: any = {
       type: "tencent",
       layer: "custom",
       style: "4",
-      id: 24,
+      id: 10007,
       templateValues: {
         dataServer: "//data.mars3d.cn",
         gltfServerUrl: "//data.mars3d.cn/gltf",
@@ -166,7 +166,7 @@ export const map3dConfig: any = {
       zIndex: 24,
     },
     {
-      id: 2023,
+      id: 10008,
       pid: 10,
       name: "无底图",
       type: "grid",

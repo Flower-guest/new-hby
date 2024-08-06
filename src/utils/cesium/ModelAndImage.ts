@@ -40,20 +40,11 @@ export default class ModelAndImage {
     this.map3d.addLayer(this.xyzLayer);
   }
 
-  // 模型菜单点击事件
-  clickMXMenu(val) {
-    // 判断是否加载了模型
-    if (this.tiles3dLayer && this.tiles3dLayer.name === val.name) {
-      // 判断是否已经记载过改模型，加载过就不需要重复加载了，没加载过就进行加载
-      this.tiles3dLayer.show = !this.tiles3dLayer.show;
-    } else {
-      this.addCesium3DTileSet(val);
-    }
-  }
   // 添加3DTile模型
   addCesium3DTileSet(obj) {
     this.delete3DTile();
     this.tiles3dLayer = new window.mars3d.layer.TilesetLayer({
+      id:obj.id,
       name: obj.name,
       url: obj.url,
       position: obj?.Pos
@@ -69,6 +60,7 @@ export default class ModelAndImage {
       ...dTilesOption,
       enableDebugWireframe: false, // 是否可以进行三角网的切换显示
       flyTo: obj?.flyTo ?? false,
+      shadows: window.Cesium.ShadowMode.ENABLED
     });
     this.map3d.addLayer(this.tiles3dLayer);
   }

@@ -79,12 +79,13 @@ const isIndeterminate = ref<boolean>(false); //中间状态
 const jsonUrl: any = []; //外链json数据数组
 const sceneCamera: any = []; //场景视角
 
-let measure: any, mapEvent: any, modelAndImage: any;
+let measure: any, mapEvent: any, modelAndImage: any, split: any;
 
 const initMars = () => {
   measure = window.cesiumInit.measure;
   modelAndImage = window.cesiumInit.modelAndImage;
   mapEvent = window.cesiumInit.mapEvent;
+  split = window.cesiumInit.split;
 };
 
 // 初始化数据
@@ -139,6 +140,8 @@ const handelRadio = (i: DetailProps["toolMenu"]) => {
 const menuClick = async (val, billArr: number[] = []) => {
   // 当菜单点击的时候 获取当前激活的菜单数据
   // emit("handelMenu");
+  if (val.menu_type !== "dualViewSync") split.destroyControl();
+
   switch (val.menu_type) {
     case "measureMaster":
       measure.measureStart(val.handle_type, () => {
@@ -146,8 +149,13 @@ const menuClick = async (val, billArr: number[] = []) => {
       });
       break;
     case "tilesLoading":
-      modelAndImage.clickMXMenu(val);
+      modelAndImage.addCesium3DTileSet(val);
       if (activeBtn.value) mapEvent.flyToPoint(val.scene_camera);
+      break;
+    case "dualViewSync": //分屏比对
+      if (activeBtn.value) {
+        split.createControl(val);
+      }
       break;
     default:
       useLoadData(billArr);
