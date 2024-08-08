@@ -56,9 +56,8 @@
   <!-- 淹没分析 -->
   <AsyncFlood v-model:flood="comVisible.floodCheck" />
 
-  <!-- <AsyncCreatePlan ref="createPlanRef" /> -->
-  <!-- 底部分区功能 -->
-  <!-- <AsyncZone ref="zoneRef" /> -->
+  <!-- 规划分区功能 -->
+  <AsyncPlanZone ref="zoneRef" />
   <!-- 招商导览功能 -->
   <!-- <AsyncReport v-show="report.show" :report-id="report.id" /> -->
 </template>
@@ -75,25 +74,19 @@ const AsyncLocSearch = defineAsyncComponent(
 const AsyncOperateMenu = defineAsyncComponent(
   () => import("./OperateMenu/index.vue")
 );
-// const AsyncCreatePlan = defineAsyncComponent(
-//   () => import("./components/createPlan/index.vue")
-// );
-// const AsyncZone = defineAsyncComponent(
-//   () => import("./components/zone/index.vue")
-// );
+const AsyncPlanZone = defineAsyncComponent(
+  () => import("./PlanZone/index.vue")
+);
 // const AsyncReport = defineAsyncComponent(
 //   () => import("./components/invGuide/index.vue")
 // );
 
-interface detailProps {
+const props = defineProps<{
   menu: any;
-}
-
-const props = defineProps<detailProps>();
+}>();
 
 // const menuRef = ref<InstanceType<typeof AsyncOperateMenu> | null>();
-// const createPlanRef = ref<InstanceType<typeof AsyncCreatePlan> | any>();
-// const zoneRef = ref<InstanceType<typeof AsyncZone> | null>();
+const zoneRef = ref<InstanceType<typeof AsyncPlanZone> | null>();
 
 // 组件显隐
 const comVisible = reactive({
@@ -115,6 +108,9 @@ const menuVal = ref<any>(props.menu);
 watch(
   () => props.menu,
   (newVal) => {
+    newVal.forEach((item: any) => {
+      if (item.menu_type === "planZoning") item.childlist = [];
+    });
     menuVal.value = newVal;
     tabChange();
   }
@@ -128,8 +124,7 @@ const tabChange = () => {
   comVisible.locSearch = false; // 隐藏点位搜索框
   comVisible.sunlightCheck = false; // 隐藏点位搜索框
   comVisible.floodCheck = false; // 隐藏点位搜索框
-  // zoneRef.value?.resetActive(); //重置分区状态
-  // if (createPlanRef.value) createPlanRef.value.showAITool = false;
+  zoneRef.value?.resetActive(); //重置分区状态
 };
 
 // 下拉菜单样式
@@ -147,12 +142,11 @@ const isActiveMenu = computed(() => (id: string) => activeMenu.value === id);
 
 // tool点击功能
 const handleToolClick = (i) => {
-  console.log(i);
   activeMenu.value = activeMenu.value == i.id ? "" : i.id; //点击相同取消选中状态
+
   if (i.menu_type !== "dualViewSync" || !activeMenu.value)
     window.cesiumInit.split.destroyControl();
-  // zoneRef.value?.resetActive(); //重置分区状态
-  // if (createPlanRef.value.showAITool) createPlanRef.value.showAITool = false;
+
   switch (i.menu_type) {
     case "locSearch": //位置搜索
     case "sunlightCheck": //日照分析
@@ -161,12 +155,17 @@ const handleToolClick = (i) => {
       break;
     case "panoPoints": //全景点位
     case "designCases": //全景设计比对点位
+    case "planZoning": //规划分区
       if (activeMenu.value) {
-        useLoadData([i.id], [i.jsonurl]);
+        useLoadData([i.id], [{ url: i.jsonurl, id: i.id }]);
         window.cesiumInit.mapEvent.flyToPoint(i.scene_camera);
+
+        if (i.menu_type === "planZoning") zoneRef.value?.loadData(i.id);
       } else {
         window.cesiumInit.mapEvent.removeLayer(i.id, "id");
         window.cesiumInit.divGraphic.removeLayer(i.id);
+
+        if (i.menu_type === "planZoning") zoneRef.value?.resetActive(); //重置分区状态
       }
       break;
     case "rankScores": //积分排行榜

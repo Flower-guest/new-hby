@@ -71,8 +71,4 @@ export default class ModelAndImage {
       this.tiles3dLayer = null;
     }
   }
-  // 隐藏图层
-  changeLayer(type) {
-    this.xyzLayer.setOpacity(type == "hide" ? 0 : 1);
-  }
 }

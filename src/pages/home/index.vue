@@ -72,7 +72,7 @@ const visible = reactive({
   webView: false,
   person: false,
   design: false,
-  vr: false,
+  vr: true,
 });
 
 let vrTotalUrl;

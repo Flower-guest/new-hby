@@ -1,5 +1,4 @@
 import { simplify } from "@turf/turf";
-import { randomRgbaColor } from "@/utils";
 
 const comStyleOptions = (option) => {
   return {
@@ -12,6 +11,7 @@ const comStyleOptions = (option) => {
 export default class PrimitiveLoader {
   map3d: any;
   loadShp: any; //加载shp
+  primitiveLayer: any;
   geoJsonLayer: any; //加载geoJson
   polyline: any; //线对象
   polylinePrimitive: any; //线图层
@@ -25,25 +25,18 @@ export default class PrimitiveLoader {
     this.map3d = map3d;
     // geoJson
     this.geoJsonLayer = [];
+    this.primitiveLayer = new window.mars3d.layer.GraphicLayer();
     // polyline
-    this.polylinePrimitive = new window.mars3d.layer.GraphicLayer();
     this.polyline = [];
-    this.map3d.addLayer(this.polylinePrimitive);
     // polygon
-    this.polygonPrimitive = new window.mars3d.layer.GraphicLayer();
     this.polygon = [];
-    this.map3d.addLayer(this.polygonPrimitive);
     // Circle
-    this.circlePrimitive = new window.mars3d.layer.GraphicLayer();
     this.circle = [];
-    this.map3d.addLayer(this.circlePrimitive);
-
-    //用来存储随机颜色对象
-    this.manyColor = {};
+    this.map3d.addLayer(this.primitiveLayer);
   }
   // 初始化点击事件
   initClick(ck) {
-    this.polygonPrimitive.on(window.mars3d.EventType.click, function (event) {
+    this.primitiveLayer.on(window.mars3d.EventType.click, function (event) {
       ck(event);
     });
   }
@@ -95,7 +88,7 @@ export default class PrimitiveLoader {
       flyTo: option?.flyTo ?? false,
     });
     this.polyline.push(graphic);
-    this.polylinePrimitive.addGraphic(graphic);
+    this.primitiveLayer.addGraphic(graphic);
   }
   // 添加面
   addPolygonPrimitive(option: any) {
@@ -127,7 +120,7 @@ export default class PrimitiveLoader {
       flyToOptions: option?.flyToOptions ? option.flyToOptions : {},
     });
     this.polygon.push(graphic);
-    this.polygonPrimitive.addGraphic(graphic);
+    this.primitiveLayer.addGraphic(graphic);
   }
   // 删除面、线数据
   deleteFn() {
@@ -143,32 +136,6 @@ export default class PrimitiveLoader {
     }
     if (this.circle.length > 0) {
       this.removeFeatures(this.circle, 'attr.isForever');
-    }
-  }
-  // 隐藏图层
-  changeLayer(type) {
-    if (this.geoJsonLayer.length > 0) {
-      this.geoJsonLayer.forEach((i) => {
-        i.setOpacity(type == "hide" ? 0 : 1);
-      });
-    }
-    // 线
-    if (this.polyline.length > 0) {
-      this.polyline.forEach((i) => {
-        i.setOpacity(type == "hide" ? 0 : 1);
-      });
-    }
-    // 面
-    if (this.polygon.length > 0) {
-      this.polygon.forEach((i) => {
-        i.setOpacity(type == "hide" ? 0 : 1);
-      });
-    }
-    // circle
-    if (this.circle.length > 0) {
-      this.circle.forEach((i) => {
-        i.setOpacity(type == "hide" ? 0 : 1);
-      });
     }
   }
 

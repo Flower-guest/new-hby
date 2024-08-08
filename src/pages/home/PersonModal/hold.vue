@@ -31,16 +31,75 @@
         </div>
         <!-- 人口信息 -->
         <div v-show="titleTabActive == 'l'">
-          <CustomTable
-            :data="state.villagerData"
-            :tableList="tabList"
-            :lazy="state.loading"
-            :total="state.total"
-            :page-size="state.pageSize"
-            :current-page="state.pageNo"
-            @current-change="changePage"
-            @changePage="changePage"
-          />
+          <div class="table h-380px">
+            <div class="table-head">
+              <div class="table-tr">
+                <span
+                  v-for="i in tabList"
+                  :key="i.label"
+                  class="table-th rel"
+                  :style="{ width: widthTD }"
+                  >{{ i.label }}</span
+                >
+              </div>
+            </div>
+            <div class="table-body">
+              <template v-if="state.villagerData.length > 0">
+                <div
+                  class="table-tr mt-9px py-16px"
+                  v-for="i in state.villagerData"
+                  :key="i.name"
+                >
+                  <div
+                    class="table-td"
+                    :style="{ width: widthTD }"
+                    v-for="j in tabList"
+                    :key="j.label"
+                  >
+                    <div class="name-item">
+                      {{
+                        j?.type
+                          ? getDictLabel(i.id)
+                          : j?.maskType
+                          ? maskNumber(j?.maskType, i[j.prop])
+                          : i[j.prop]
+                      }}
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <div class="text-[#33f7ff] text-center text-[24px] mt-20px">
+                  暂无数据
+                </div>
+              </template>
+            </div>
+          </div>
+          <!-- 底部分页按钮 -->
+          <div class="flex justify-center mt-20px">
+            <el-pagination
+              background
+              layout="slot"
+              :total="state.total"
+              :page-size="state.pageSize"
+              :current-page="state.pageNo"
+              :hide-on-single-page="totalPage < 2"
+              @current-change="changePage"
+            >
+              <div key="1" class="flex">
+                <div class="pagination-btn" @click="changePage('prev')">
+                  上一页
+                </div>
+                <div class="pagination-pageNo mx-15px">
+                  <span class="text-[#3E8999]">{{ state.pageNo }}/</span
+                  ><span class="text-[#C8F1F9]">{{ totalPage }}</span>
+                </div>
+                <div class="pagination-btn" @click="changePage('next')">
+                  下一页
+                </div>
+              </div>
+            </el-pagination>
+          </div>
         </div>
         <!-- 房屋信息 -->
         <div v-show="titleTabActive == 'r'">
@@ -100,13 +159,10 @@
 </template>
 
 <script setup lang="ts">
-import {
-  // maskNumber,
-  getAssets,
-} from "@/utils";
-// import { getDictLabel } from "@/utils/dict";
+import { maskNumber, getAssets } from "@/utils";
+import { getDictLabel } from "@/utils/dict";
 import { tabList } from "@/const/personModal";
-// import { GetDataByTypeId } from "@/service/api";
+import { GetDataByTypeId } from "@/service/api";
 import { rowList } from "@/const/tableInfo";
 
 const attrs: any = useAttrs();
@@ -117,6 +173,10 @@ const bgConfig = computed(() => (i) => {
   return titleTabActive.value == i
     ? `url(${getAssets(`btn-person-${i}-active.png`)})`
     : `url(${getAssets(`btn-person-${i}.png`)}`;
+});
+const widthTD = computed(() => {
+  //计算属性传递参数
+  return 100 / tabList.length + "%";
 });
 
 const state = reactive<any>({
@@ -129,152 +189,40 @@ const state = reactive<any>({
   fnum: 0, //关联对象
 });
 
+// 总页数
+const totalPage = computed(() => Math.ceil(state.total / state.pageSize));
+
 // 传参实时监听变化与赋值
 watch(
   () => attrs.show,
   (newValue) => {
-    getVillagers(newValue);
+    console.log(newValue);
+    getVillagers();
     getBuilding();
   }
 );
 
 // 获取人口信息
-const getVillagers = async (val) => {
-  // const res: any = await GetDataByTypeId({
-  //   type: val.dataType,
-  //   id: val.dataValue,
-  // });
-  const res = {
-    list: [
-      {
-        name: "李四",
-        gender: 0,
-        idNumber: "string",
-        isPartyMember: 0,
-        isKeyFocusGroups: 0,
-        isThisVillageVillagers: 0,
-        age: 0,
-        maritalStatus: 2,
-        childrenNumber: 0,
-        workingStatus: 1,
-        phoneNumber: "string",
-        tel: "string",
-        fileNum: "string",
-        fnum: 0,
-        building: "string",
-        floor: "string",
-        houseNumber: "string",
-        registeredResidence: "string",
-        school: "string",
-        job: "string",
-        skill: "string",
-        health: "string",
-        vegetableField: "string",
-        isLeftChild: 0,
-        isFarmerSubsidy: 0,
-        isSafeWater: 0,
-        yearOutpoor: "string",
-        poorReason: "不喜欢",
-        propertyOutpoor: "string",
-        poorAccount: "23590",
-        helpPerson: "string",
-        helpIndustry: "string",
-        imagePerson: ["string"],
-        remarks: "string",
-        gridName: "芋艿",
-        groupName: "李四",
-        politicalOrientation: "string",
-        post: "string",
-        educationLevel: "string",
-        labor: "string",
-        socialSecurity: "string",
-        relationshipHuzhu: "string",
-        familyProperty: "string",
-        persionSituation: "string",
-        showLevel: 0,
-        id: 7422,
-      },
-    ],
-    total: 0,
-  };
-  state.villagerData = res.list;
+const getVillagers = async () => {
+  const res: any = await GetDataByTypeId(state);
+  state.villagerData = res.list.reverse();
   state.total = res.total;
-  console.log(val, res);
 };
 // 获取房屋信息
 const getBuilding = async () => {
-  const res = [
-    {
-      dataType: "2",
-      fnum: 0,
-      mapElementsName: "王五",
-      x: "string",
-      y: "string",
-      storeyNo: 0,
-      addressNo: "string",
-      assetNo: "string",
-      assetName: "芋艿",
-      assetType: "1",
-      assetUsage: "string",
-      rentalIntention: 0,
-      houseTypeBuild: 0,
-      address: "string",
-      buildingStructure: "string",
-      occupyingArea: 0,
-      yearBuilt: "string",
-      isLift: "string",
-      buildingType: "1",
-      floorSpace: 0,
-      assetStatus: 1,
-      buildingOrientation: "string",
-      ownerName: "赵六",
-      ownerId: "12526",
-      assetCertificateNumber: "string",
-      investmentStatus: 1,
-      listingPrice: 24052,
-      merchantsMode: "string",
-      floor: 0,
-      decorationStatus: "1",
-      usageDescribe: "string",
-      lookNumber: 0,
-      contacts: "string",
-      telephone: "string",
-      transactionPrice: 16410,
-      expirationTime: "2019-08-24T14:15:22Z",
-      locationDescription: "你猜",
-      panoramicAddress: "string",
-      videoAddress: "string",
-      assetImage: ["string"],
-      landType: "2",
-      houseType: "1",
-      investmentPromotionTime: "2019-08-24T14:15:22Z",
-      remarks: "string",
-      gridName: "赵六",
-      groupName: "李四",
-      titleInvestment: "string",
-      tagInvestment: "string",
-      buildingTypeOther: "string",
-      showLevel: 0,
-      id: 2163,
-      createTime: "2019-08-24T14:15:22Z",
-    },
-  ];
-  // const res: any = await GetDataByTypeId({
-  //   type: "asset",
-  //   id: 1,
-  // });
+  const res: any = await GetDataByTypeId(state);
   state.buildingData = res[0];
 };
 
-const changePage = (val, totalPage = null) => {
+const changePage = (val) => {
   if (val == "prev") {
     if (state.pageNo < 2) return (state.pageNo = 1);
     state.pageNo--;
   } else {
-    if (state.pageNo > totalPage - 1) return;
+    if (state.pageNo > totalPage.value - 1) return;
     state.pageNo++;
   }
-  getVillagers({});
+  getVillagers();
 };
 
 const emit = defineEmits(["update:show", "showWebView"]);
@@ -452,3 +400,4 @@ const updateShow = () => {
   }
 }
 </style>
+@/const/tableInfo

@@ -77,7 +77,7 @@ import * as authUtil from "@/utils/auth";
 
 const { push } = useRouter();
 
-let { gid }: { gid: string } = useUrlSearchParams("hash");
+let { gid }: { gid: number } = useUrlSearchParams("hash");
 
 /** 登录表单元素的引用 */
 const loginFormRef = ref<FormInstance | null>(null);
@@ -165,7 +165,7 @@ const getProjectList = async () => {
         projectInfo.checkedProject = true;
         projectInfo.projectList = projectList;
       } else {
-        gid = projectList.length[0].id;
+        gid = projectList[0].id;
         toPage(gid);
       }
     } catch (error) {

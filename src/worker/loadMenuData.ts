@@ -25,15 +25,19 @@ self.onmessage = async (e) => {
         if (geometry.type === 'Point') {
           const { properties, geometry } = val;
           const markerType = properties?.eventType ? dict[properties.eventType].name : '';
-          formatMenuData[id].marker.push({
-            position: geometry.coordinates,
-            id: properties.id,
-            name: id,
-            img: properties?.customIcon || data[id].icon || '',
-            attr: { ...properties, isForever: isForever ? true : false, markerType },
-            text: properties.style.label.text,
-            markerType
-          });
+          if (properties.type === 'circle') {
+            formatMenuData[id].lineAndPolygon.features.push(val)
+          } else {
+            formatMenuData[id].marker.push({
+              position: geometry.coordinates,
+              id: properties.id,
+              name: id,
+              img: properties?.customIcon || data[id].icon || '',
+              attr: { ...properties, isForever: isForever ? true : false, markerType },
+              text: properties.style.label.text,
+              markerType
+            });
+          }
         } else {
           // 处理线面数据
           const { properties } = val;

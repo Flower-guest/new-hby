@@ -1,7 +1,7 @@
 import { ElLoading } from "element-plus";
 import { getServeImg } from "@/utils";
 import "@/assets/css/divGraphic.less";
-export default class DivGraphic {
+export default class DivAndBillboard {
   map3d: any;
   graphicDivLayer: any; //marker图层
   loading: any;
@@ -16,6 +16,7 @@ export default class DivGraphic {
     this.graphicDivLayer = new window.mars3d.layer.GraphicLayer();
     this.map3d.addLayer(this.graphicDivLayer);
     this.clusterLayer = null;
+    // this.addClusterLayer();
   }
   // 添加点位点击事件
   initClick(ck) {
@@ -90,26 +91,24 @@ export default class DivGraphic {
   addClusterLayer() {
     if (!this.clusterLayer) {
       this.clusterLayer = new window.mars3d.layer.GraphicLayer({
-        clustering: {
-          enabled: true,
-          pixelRange: 20,
-          clampToGround: true,
-          color: "rgba(13,78,89,.8)",
-        },
+        // clustering: {
+        //   enabled: true,
+        //   pixelRange: 20,
+        //   center: { lat: 31.639275, lng: 117.388877, alt: 52574.8, heading: 339.3, pitch: -65 },
+        // },
       });
       this.map3d.addLayer(this.clusterLayer);
-      this.clusterLayer.on(window.mars3d.EventType.click, (event) => {
-        if (event.graphic?.attr) {
-          this.ck(event);
-        } else {
-          const p = window.mars3d.LngLatPoint.fromCartesian(event.cartesian);
-          window.cesiumInit.mapEvent.flyToPoint({
-            position: [p.lng, p.lat],
-            radius: p.alt + 150,
-            time: 2,
-          });
-        }
-      });
+      // this.clusterLayer.on(window.mars3d.EventType.click, (event) => {
+      //   if (event.graphic?.attr) {
+      //     this.ck(event);
+      //   } else {
+      //     const p = window.mars3d.LngLatPoint.fromCartesian(event.cartesian);
+      //     this.map3d.flyToPoint([p.lng, p.lat], {
+      //       radius: p.alt + 150,
+      //       duration: 2,
+      //     });
+      //   }
+      // });
     }
   }
   //添加基本点位
@@ -215,19 +214,6 @@ export default class DivGraphic {
         // 如果isForever为true则不删除
         !layer.isForever && this.graphicDivLayer.removeGraphic(layer)
       });
-    }
-  }
-  // 隐藏图层
-  changeLayer(type) {
-    // 删除div点数据
-    if (this.graphicDivLayer.graphics.length > 0) {
-      this.graphicDivLayer.graphics.forEach((i) => {
-        i.setOpacity(type == "hide" ? 0 : 1);
-      });
-    }
-    // 删除点聚合数据
-    if (this.clusterLayer) {
-      this.clusterLayer.setOpacity(type == "hide" ? 0 : 1);
     }
   }
 }

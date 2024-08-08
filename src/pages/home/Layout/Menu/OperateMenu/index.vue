@@ -2,27 +2,26 @@
   <!-- 场景切换选项 -->
   <div class="menuBox" v-if="toolMenus">
     <template v-if="props.eventType === 'checkboxGroup'">
-      <div class="checkbox" v-for="(i, idx) in toolMenus" :key="idx">
+      <div class="checkbox" v-for="(menu, idx) in toolMenus" :key="idx">
         <el-checkbox
-          v-model="i.check"
-          :indeterminate="i.isInd"
-          @change="handleChange(i, $event)"
-          >{{ i.name }}</el-checkbox
+          v-model="menu.check"
+          :indeterminate="menu.isInd"
+          @change="handleCheckboxGroupChange(menu, $event)"
+          >{{ menu.name }}</el-checkbox
         >
-        <template v-if="i.childlist">
-          <el-checkbox-group
-            v-model="checkedCities"
-            @change="handleCitiesChange(i, $event)"
+        <el-checkbox-group
+          v-if="menu.childlist"
+          v-model="checkedCities"
+          @change="handleChildlistChange(menu, $event)"
+        >
+          <el-checkbox
+            v-for="child in menu.childlist"
+            :key="child.id"
+            :label="child.name"
+            :value="child.id"
+            >{{ child.name }}</el-checkbox
           >
-            <el-checkbox
-              v-for="is in i.childlist"
-              :key="is.id"
-              :label="is.name"
-              :value="is.id"
-              >{{ is.name }}</el-checkbox
-            >
-          </el-checkbox-group>
-        </template>
+        </el-checkbox-group>
       </div>
     </template>
     <template v-else-if="props.eventType === 'checkbox'">
@@ -31,32 +30,29 @@
         <el-checkbox
           v-model="checkAll"
           :indeterminate="isIndeterminate"
-          @change="handleCheckAllChange"
+          @change="toggleCheckAll"
           >全部</el-checkbox
         >
-        <el-checkbox-group
-          v-model="checkedCities"
-          @change="handleCheckedCitiesChange"
-        >
+        <el-checkbox-group v-model="checkedCities" @change="syncCheckedCities">
           <el-checkbox
-            v-for="i in toolMenus"
-            :key="i.id"
-            :label="i.name"
-            :value="i.id"
-            >{{ i.name }}</el-checkbox
+            v-for="menu in toolMenus"
+            :key="menu.id"
+            :label="menu.name"
+            :value="menu.id"
+            >{{ menu.name }}</el-checkbox
           >
         </el-checkbox-group>
       </div>
     </template>
     <template v-else>
       <div
-        v-for="i in toolMenus"
-        :key="i.id"
+        v-for="menu in toolMenus"
+        :key="menu.id"
         class="radio"
-        :class="{ activeText: activeBtn == i.id ? true : false }"
-        @click="handelRadio(i)"
+        :class="{ activeText: activeBtn == menu.id }"
+        @click="toggleRadio(menu)"
       >
-        {{ i.name }}
+        {{ menu.name }}
       </div>
     </template>
   </div>
@@ -70,50 +66,60 @@ interface DetailProps {
 const props = defineProps<DetailProps>();
 
 const activeBtn = ref<number | null>(null); //当前点击的按钮
-const checkedCities = ref<any>([]); //选中的值
-const cities: string[] = []; //选项值长度 用来判断是否全部选中
+const checkedCities = ref<number[]>([]); //选中的值
+const cities: number[] = []; //选项值长度 用来判断是否全部选中
 const toolMenus = ref<any>(); //菜单内容
 const checkAll = ref<boolean>(false); //全部
 const isIndeterminate = ref<boolean>(false); //中间状态
 
-const jsonUrl: any = []; //外链json数据数组
-const sceneCamera: any = []; //场景视角
+const jsonUrl: { url: string; id: number }[] = []; //外链json数据数组
+const sceneCamera: { camera: any; id: number }[] = []; //场景视角
 
-let measure: any, mapEvent: any, modelAndImage: any, split: any;
+const { measure, mapEvent, modelAndImage, split } = window.cesiumInit;
 
-const initMars = () => {
-  measure = window.cesiumInit.measure;
-  modelAndImage = window.cesiumInit.modelAndImage;
-  mapEvent = window.cesiumInit.mapEvent;
-  split = window.cesiumInit.split;
-};
-
-// 初始化数据
 const initData = () => {
   toolMenus.value = props.toolMenu;
-  if (props.eventType === "checkboxGroup") {
-    toolMenus.value.forEach((i) => {
-      i.isInd = false;
-      i.check = false;
-      i.cities = [];
-      if (i.childlist.length > 0) {
-        i.childlist.forEach((child) => {
-          processItem(child);
-          i.cities.push(child.id);
-        });
-      } else {
-        i.cities.push(i.id);
-      }
-    });
-  } else {
-    toolMenus.value.forEach((i: any) => {
-      processItem(i);
-      cities.push(i.id);
-    });
-  }
+  toolMenus.value.forEach((menu) => {
+    menu.isInd = false;
+    menu.check = false;
+    menu.cities = [];
+
+    if (props.eventType === "checkboxGroup") {
+      processGroupMenu(menu);
+    } else {
+      processItem(menu);
+    }
+
+    const layers = window.cesiumInit.map3d.getLayersByAttr(menu.id, "id");
+    const divLayer =
+      window.cesiumInit.divGraphic.graphicDivLayer.getGraphicsByAttr(
+        menu.id,
+        "name"
+      );
+
+    if (layers.length > 1 && divLayer.length > 1) {
+      checkedCities.value.push(menu.id);
+    }
+  });
+
+  checkAll.value = checkedCities.value.length === cities.length;
+  isIndeterminate.value =
+    checkedCities.value.length > 0 &&
+    checkedCities.value.length < cities.length;
+  activeBtn.value = checkedCities.value[0];
 };
 
 // 定义一个辅助函数来处理单个对象
+const processGroupMenu = (menu) => {
+  if (menu.childlist.length > 0) {
+    menu.childlist.forEach((child) => {
+      processItem(child);
+      menu.cities.push(child.id);
+    });
+  } else {
+    menu.cities.push(menu.id);
+  }
+};
 const processItem = (item) => {
   if (item.jsonurl) {
     jsonUrl.push({ url: item.jsonurl, id: item.id });
@@ -121,17 +127,18 @@ const processItem = (item) => {
   if (item.scene_camera) {
     sceneCamera.push({ camera: item.scene_camera, id: item.id });
   }
+  cities.push(item.id);
 };
 
 // 单选点击事件
-const handelRadio = (i: DetailProps["toolMenu"]) => {
+const toggleRadio = (menu: DetailProps["toolMenu"]) => {
   // 当前页面点面实现共存 ，当有点时 在点击点数据 进行点数据删除再加载当前点击的点位数据 面数据同理
-  activeBtn.value = activeBtn.value == i.id ? null : i.id;
+  activeBtn.value = activeBtn.value == menu.id ? null : menu.id;
   if (activeBtn.value) {
-    mapEvent.flyToPoint(i.scene_camera);
-    deleteGraphic([i.id], () => menuClick(i, [i.id]));
+    mapEvent.flyToPoint(menu.scene_camera);
+    deleteGraphic([menu.id], () => menuClick(menu, [menu.id]));
   } else {
-    mapEvent.removeLayer(i.id, "id");
+    mapEvent.removeLayer(menu.id, "id");
   }
 };
 
@@ -153,9 +160,7 @@ const menuClick = async (val, billArr: number[] = []) => {
       if (activeBtn.value) mapEvent.flyToPoint(val.scene_camera);
       break;
     case "dualViewSync": //分屏比对
-      if (activeBtn.value) {
-        split.createControl(val);
-      }
+      if (activeBtn.value) split.createControl(val);
       break;
     default:
       useLoadData(billArr);
@@ -164,14 +169,14 @@ const menuClick = async (val, billArr: number[] = []) => {
 };
 
 // 单个多选框 全选事件
-const handleCheckAllChange = (val: boolean) => {
+const toggleCheckAll = (val: boolean) => {
   checkedCities.value = val ? cities : [];
   isIndeterminate.value = false;
   deleteGraphic([cities], () => val && formatData(cities));
 };
 
 // 单个多选框 子集选择事件
-const handleCheckedCitiesChange = (value: number[]) => {
+const syncCheckedCities = (value: number[]) => {
   const checkedCount = value.length;
   checkAll.value = checkedCount === cities.length;
   isIndeterminate.value = checkedCount > 0 && checkedCount < cities.length;
@@ -179,42 +184,38 @@ const handleCheckedCitiesChange = (value: number[]) => {
 };
 
 // 多个多选框 全选事件
-const handleChange = (item, val: boolean) => {
-  item.check = val;
-  if (!val) item.isInd = val; //去除中间状态
-  const childrenArray = item.cities;
-  if (val) {
-    checkedCities.value = childrenArray;
-  } else {
-    checkedCities.value = checkedCities.value.filter(
-      (id) => !childrenArray.includes(id)
-    );
-  }
+const handleCheckboxGroupChange = (menu, val: boolean) => {
+  if (!val) menu.isInd = val; //去除中间状态
+  const childrenArray = menu.cities;
+  checkedCities.value = menu.check
+    ? [...checkedCities.value, ...childrenArray]
+    : checkedCities.value.filter((id) => !childrenArray.includes(id));
   deleteGraphic(
     checkedCities.value,
     () => {
-      const citiesResult = item.cities.filter((item) =>
+      const citiesResult = menu.cities.filter((item) =>
         checkedCities.value.includes(item)
       );
       formatData(citiesResult);
     },
-    item.cities
+    menu.cities
   );
 };
 
-// 多个多选框 子集选择事件  i:父级当前对象  value:选中的值
-const handleCitiesChange = (i, value: string[]) => {
-  const includeResult = i.cities.filter((id) => value.includes(id));
-  i.check = includeResult.length === i.cities.length;
-  i.isInd = includeResult.length > 0 && includeResult.length < i.cities.length;
-  deleteGraphic(value, () => formatData(includeResult), i.cities);
+// 多个多选框 子集选择事件  menu  value:选中的值
+const handleChildlistChange = (menu, value: string[]) => {
+  const includeResult = menu.cities.filter((id) => value.includes(id));
+  menu.check = includeResult.length === menu.cities.length;
+  menu.isInd =
+    includeResult.length > 0 && includeResult.length < menu.cities.length;
+  deleteGraphic(value, () => formatData(includeResult), menu.cities);
 };
 
 // 加载数据与对应的视角
 const formatData = (value) => {
   const jsonResult = jsonUrl.filter((item) => value.includes(item.id)); //外链地址
   const cameraResult =
-    sceneCamera.filter((item) => value.includes(item.id)).pop() || null; //视角
+    sceneCamera.find((item) => value.includes(item.id)) || null; //视角
   mapEvent.flyToPoint(cameraResult);
   useLoadData(value, jsonResult);
 };
@@ -236,7 +237,6 @@ const deleteGraphic = (checkArray, ck, fArray = cities) => {
 };
 
 onMounted(() => {
-  initMars();
   initData();
 });
 </script>

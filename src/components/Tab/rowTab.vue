@@ -1,11 +1,3 @@
-<!--
- * @Author: cxj 1481240653@qq.com
- * @Date: 2023-07-14 15:45:44
- * @LastEditors: cxj 1481240653@qq.com
- * @LastEditTime: 2024-01-10 17:49:53
- * @FilePath: \lhs-demo\src\components\TableList\index.vue
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
 <template>
   <el-row :gutter="20" class="row">
     <template v-for="j in props.rowList" :key="j.value">
@@ -57,7 +49,7 @@ const init = (newValue) => {
       } else if (i.type == "html") {
         dataInfo.value[i.prop] = newValue[i.prop];
       } else {
-        const label = getDictLabel(i.type, newValue[i.prop]);
+        const label = getDictLabel(newValue[i.prop]);
         dataInfo.value[i.prop] = label;
       }
     });

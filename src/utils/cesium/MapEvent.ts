@@ -1,11 +1,3 @@
-/*
- * @Author: cxj 1481240653@qq.com
- * @Date: 2024-07-15 16:36:02
- * @LastEditors: cxj 1481240653@qq.com
- * @LastEditTime: 2024-08-02 16:15:58
- * @FilePath: \new-hby\src\utils\cesium\MapEvent.ts
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 import { ElMessage } from "element-plus";
 import { GAODE_POI_KEY } from "@/const/util";
 

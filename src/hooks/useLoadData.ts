@@ -1,24 +1,21 @@
-/*
- * @Author: cxj 1481240653@qq.com
- * @Date: 2024-07-15 16:36:02
- * @LastEditors: cxj 1481240653@qq.com
- * @LastEditTime: 2024-08-05 17:58:36
- * @FilePath: \new-hby\src\hooks\useLoadData.ts
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 import { getMenuData, getDict } from "@/utils/auth";
 import { ElLoading } from "element-plus";
 
 export const useLoadData = async (checkMenuArr: any = [], jsonUrl: any = []) => {
   if (checkMenuArr.length < 1) return;
-  const noHaveLayerId: any = []; //没有加载的图层id
+  const noHaveLayerId: any = [], noHasJsonUrl: any = []; //没有加载的图层id
   checkMenuArr.forEach(id => {
     const layers = window.cesiumInit.map3d.getLayersByAttr(id, 'id');
     const divLayer = window.cesiumInit.divGraphic.graphicDivLayer.getGraphicsByAttr(id, 'name');
     if (layers.length < 1 && divLayer.length < 1) noHaveLayerId.push(id);
   })
+  jsonUrl.forEach(item => {
+    const layers = window.cesiumInit.map3d.getLayersByAttr(item.id, 'id');
+    const divLayer = window.cesiumInit.divGraphic.graphicDivLayer.getGraphicsByAttr(item.id, 'name');
+    if (layers.length < 1 && divLayer.length < 1) noHasJsonUrl.push(item);
+  })
 
-  workerFormat(getMenuData(), noHaveLayerId, false, jsonUrl)
+  workerFormat(getMenuData(), noHaveLayerId, false, noHasJsonUrl)
 };
 
 /**
@@ -56,7 +53,8 @@ export const workerFormat = (data: any, checkMenuArr: any = [], isForever = fals
               case "pano":
               case "design":
               case "houseInfo":
-                divGraphic.addBillboard({ ...val, clusterLayer: marker.length > 50 }); break;
+                // divGraphic.addBillboard({ ...val, isCluster: marker.length > 50 }); break;
+                divGraphic.addBillboard({ ...val, isCluster: true }); break;
               default: divGraphic.customIcon(val); break;
             }
           }
@@ -72,7 +70,7 @@ export const workerFormat = (data: any, checkMenuArr: any = [], isForever = fals
               ...borderLine.features[0].properties.style,
               fill: true,
               color: "rgb(0,0,0)",
-              opacity: 0.6,
+              opacity: 0.4,
               global: false,
             }
           }
@@ -81,7 +79,7 @@ export const workerFormat = (data: any, checkMenuArr: any = [], isForever = fals
 
       // 加载外链数据
       jsonUrl.length > 0 && jsonUrl.forEach(item => {
-        primitiveLoader.addGeoJsonLayer({ id: item.id, url: item.url, })
+        item.url && primitiveLoader.addGeoJsonLayer({ id: item.id, url: item.url, })
       })
 
       // 清理监听器和终止Worker

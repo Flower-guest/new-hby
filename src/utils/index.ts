@@ -1,20 +1,3 @@
-const colorCache: string[] = []; // 存储已生成的颜色
-
-export function randomRgbaColor(alphas?: number): string {
-  let color: string;
-  do {
-    // 随机生成RGBA颜色
-    const r: number = Math.floor(Math.random() * 254); // 随机生成256以内r值
-    const g: number = Math.floor(Math.random() * 254); // 随机生成256以内g值
-    const b: number = Math.floor(Math.random() * 254); // 随机生成256以内b值
-    const alpha: number = alphas || Math.random(); // 随机生成1以内a值
-    color = `rgba(${r},${g},${b},${alpha})`; // rgba(r,g,b,a)格式颜色
-  } while (colorCache.includes(color)); // 检查是否生成过相同的颜色
-
-  colorCache.push(color); // 将新生成的颜色添加到缓存数组中
-  return color;
-}
-
 export function maskNumber(type: string, number: string): string {
   let maskNumber;
   // 脱敏手机号
@@ -67,37 +50,6 @@ export const getJson = async (url) => {
   const result = await response.json();
   return result;
 };
-
-export const generateUUID = () => {
-  if (typeof crypto === 'object') {
-    if (typeof crypto.randomUUID === 'function') {
-      return crypto.randomUUID()
-    }
-    if (typeof crypto.getRandomValues === 'function' && typeof Uint8Array === 'function') {
-      const callback = (c: any) => {
-        const num = Number(c)
-        return (num ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (num / 4)))).toString(
-          16
-        )
-      }
-      return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, callback)
-    }
-  }
-  let timestamp = new Date().getTime()
-  let performanceNow =
-    (typeof performance !== 'undefined' && performance.now && performance.now() * 1000) || 0
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    let random = Math.random() * 16
-    if (timestamp > 0) {
-      random = (timestamp + random) % 16 | 0
-      timestamp = Math.floor(timestamp / 16)
-    } else {
-      random = (performanceNow + random) % 16 | 0
-      performanceNow = Math.floor(performanceNow / 16)
-    }
-    return (c === 'x' ? random : (random & 0x3) | 0x8).toString(16)
-  })
-}
 
 // 保留小数点指定几位数
 export const isDecimal = (num, length) => {

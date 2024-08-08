@@ -2,7 +2,7 @@ import Measure from "./Measure"; //划线等功能类
 import MapEvent from "./MapEvent"; //地图事件类
 import PrimitiveLoader from "./PrimitiveLoader"; //添加场景类
 import ModelAndImage from "./ModelAndImage";  //模型和影像
-import DivGraphic from "./DivGraphic"; //绘制div Billboard
+import DivAndBillboard from "./DivAndBillboard"; //绘制div Billboard
 import Split from "./Split"; //分屏比对
 import { map3dConfig } from "@/const/mapConfig";
 import "@/assets/css/cesiumNavigation.css";
@@ -45,7 +45,7 @@ class CesiumInit {
     // 初始化模型和影像
     this.modelAndImage = new ModelAndImage(this.map3d);
     // 初始化DIV数据图层
-    this.divGraphic = new DivGraphic(this.map3d);
+    this.divGraphic = new DivAndBillboard(this.map3d);
     // 分屏比对
     this.split = new Split(this.map3d);
   }
@@ -57,6 +57,7 @@ class CesiumInit {
     this.map3d.controls.compass.on(window.mars3d.EventType.click, () => {
       this.mapEvent.flyToPoint(scene_camera);
     });
+
     scene_camera && this.mapEvent.flyToPoint(scene_camera);
 
     if (showlt) {
