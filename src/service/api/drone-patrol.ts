@@ -1,11 +1,3 @@
-/*
- * @Author: cxj 1481240653@qq.com
- * @Date: 2024-04-22 09:50:56
- * @LastEditors: cxj 1481240653@qq.com
- * @LastEditTime: 2024-06-19 10:26:38
- * @FilePath: \hby\src\service\api\drone-patrol.ts
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 import { DroneRequest } from "..";
 
 type CreateAirline = {

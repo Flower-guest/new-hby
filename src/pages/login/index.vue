@@ -62,15 +62,20 @@
           @click="toPage(item.id)"
         >
           <img class="thumb" :src="getServeImg(item.thumb_path)" />
-          <div>{{ item.name }}</div></el-col
-        >
+          <div>{{ item.name }}</div>
+        </el-col>
       </el-row>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { GetBasicinfo, PostLogin, GetProjectList } from "@/service/api";
+import {
+  GetBasicinfo,
+  PostLogin,
+  PostGuestLogin,
+  GetProjectList,
+} from "@/service/api";
 import { type FormInstance, FormRules } from "element-plus";
 import { getServeImg } from "@/utils";
 import * as authUtil from "@/utils/auth";
@@ -115,20 +120,23 @@ const initLoginFormData = () => {
 };
 
 /** 游客登录 */
-const guestLogin = () => {
-  loginFormData.username = "guest";
-  loginFormData.password = "guest";
+const guestLogin = async () => {
+  loginFormData.username = "*****";
+  loginFormData.password = "*****";
   loginFormData.remember = false;
-  handleLogin();
+  handleLogin("guest");
 };
 
 /** 登录逻辑 */
-const handleLogin = () => {
+const handleLogin = (type = "login") => {
   loginFormRef.value?.validate(async (valid: boolean, fields) => {
     if (valid) {
       loginLoading.value = true;
       try {
-        const { appid, token } = await PostLogin(loginFormData);
+        const { appid, token } =
+          type === "guest"
+            ? await PostGuestLogin(gid)
+            : await PostLogin(loginFormData);
         if (!appid) return;
 
         // 判断是否记住密码
@@ -211,6 +219,7 @@ onMounted(async () => {
     background-color: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(19px) brightness(120%);
     -webkit-backdrop-filter: blur(19px) brightness(120%);
+
     .title {
       display: flex;
       justify-content: center;
@@ -219,12 +228,15 @@ onMounted(async () => {
       margin-top: 48px;
       color: var(--login-title-color);
     }
+
     :deep(.content) {
       padding: 52px 57px 44px;
+
       .el-form-item__label {
         color: #cccccc;
         font-size: 17px;
       }
+
       .el-input__wrapper {
         padding: 0 8px 0 0;
         box-shadow: 0 0 0px 0px
@@ -234,25 +246,31 @@ onMounted(async () => {
         cursor: default;
         background-color: transparent;
         font-size: 28px;
+
         .el-input__inner {
           color: #fff;
           cursor: default !important;
         }
       }
+
       .el-button {
         width: 100%;
         margin-top: 10px;
         background: linear-gradient(270deg, #24929e 0%, #36a9b3 100%);
         border: 1px solid var(--login-checkbox-color);
       }
+
       .el-checkbox {
         margin-top: 21px;
+
         .el-checkbox__input {
           border: 1px solid var(--login-checkbox-color);
+
           .el-checkbox__inner {
             background-color: transparent;
             border: none;
           }
+
           .el-checkbox__inner::after {
             left: 5px;
             top: 0px;
@@ -260,12 +278,14 @@ onMounted(async () => {
             border-color: var(--login-checkbox-color);
           }
         }
+
         .el-checkbox__label {
           font-size: 18px;
           color: var(--login-checkbox-color);
         }
       }
     }
+
     :deep(.el-row) {
       margin-top: 20px;
       padding: 6px;
@@ -280,6 +300,7 @@ onMounted(async () => {
         color: #fff;
         padding: 10px;
         box-sizing: border-box;
+
         .thumb {
           width: 60px;
           height: 60px;

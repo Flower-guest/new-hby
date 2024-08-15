@@ -1,11 +1,3 @@
-<!--
- * @Author: cxj 1481240653@qq.com
- * @Date: 2024-03-19 15:15:42
- * @LastEditors: cxj 1481240653@qq.com
- * @LastEditTime: 2024-06-26 17:22:13
- * @FilePath: \hby\src\pages\home\components\FootTool\addGuide.vue
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
 <template>
   <div>
     <div class="detail-guide">
@@ -166,15 +158,15 @@ import { detailTool, detailFormDialog } from "./const";
 import { DetailToolItem, ReportList, DetailScene } from "./types";
 import { useToolStore } from "@/store";
 import { getAssets } from "@/utils";
-import { toFormData } from "@/utils/upload";
+// import { toFormData } from "@/utils/upload";
 import { VueDraggable } from "vue-draggable-plus";
-import {
-  getPageReportFrame,
-  postCreateReportFrame,
-  putUpdateReportFrame,
-  deleteReportFrame,
-  putUpdateReportAnimation,
-} from "@/service/api/report";
+// import {
+//   getPageReportFrame,
+//   postCreateReportFrame,
+//   putUpdateReportFrame,
+//   deleteReportFrame,
+//   putUpdateReportAnimation,
+// } from "@/service/api/report";
 
 interface detailProps {
   detail: ReportList | null;
@@ -236,8 +228,8 @@ watch(
 // 获得汇报帧管理分页
 const getReportFrame = async () => {
   if (scene.animation) {
-    const res: any = await getPageReportFrame(scene.animation.id);
-    scene.list = res;
+    // const res: any = await getPageReportFrame(scene.animation.id);
+    // scene.list = res;
   }
 };
 
@@ -356,10 +348,10 @@ const handelFormEvent = async (type: string) => {
 
 const updateAnimationName = async () => {
   tool.topLeft[1].label = formDialog.name.form["guideName"];
-  await putUpdateReportAnimation({
-    ...scene.animation,
-    animationName: formDialog.name.form["guideName"],
-  });
+  // await putUpdateReportAnimation({
+  //   ...scene.animation,
+  //   animationName: formDialog.name.form["guideName"],
+  // });
   message.success("修改名称成功！");
 };
 
@@ -367,16 +359,16 @@ const updateAnimationName = async () => {
 const updateScene = async (type) => {
   scene.saveStatus = false; //数据进行更新就将保存状态置为false
   const tree = store.activeMenu.map((item) => ({ ...item, isShow: true }));
-  const shortMapImg = await window.cesiumInit.mapEvent.shortMapImg({
-    noSplit: true,
-  });
+  // const shortMapImg = await window.cesiumInit.mapEvent.shortMapImg({
+  //   noSplit: true,
+  // });
   const cameraView = window.cesiumInit.map3d.getCameraView();
-  const frameThumbnail = await toFormData(shortMapImg, "base64");
+  // const frameThumbnail = await toFormData(shortMapImg, "base64");
 
   const newScene: any = {
     ...scene.list[scene.idx],
     animationId: scene.animation?.id,
-    frameThumbnail,
+    // frameThumbnail,
     sceneX: cameraView.lng,
     sceneY: cameraView.lat,
     sceneZ: cameraView.alt,
@@ -406,19 +398,19 @@ const setListTime = (idx) => {
 
 // 动画帧 删除|保存
 const changeReportFrame = async (type: string) => {
-  const apiCalls = scene.list.map((item, frameOrder) => {
-    const requestData = { ...scene.animation, ...item, frameOrder };
-    if (type === "delete") return deleteReportFrame(item.id);
-    return item.id
-      ? putUpdateReportFrame(requestData)
-      : postCreateReportFrame(requestData);
-  });
+  // const apiCalls = scene.list.map((item, frameOrder) => {
+  //   const requestData = { ...scene.animation, ...item, frameOrder };
+  //   if (type === "delete") return deleteReportFrame(item.id);
+  //   return item.id
+  //     ? putUpdateReportFrame(requestData)
+  //     : postCreateReportFrame(requestData);
+  // });
 
   if (scene.deleteId.length) {
-    scene.deleteId.forEach((id) => apiCalls.push(deleteReportFrame(id)));
+    // scene.deleteId.forEach((id) => apiCalls.push(deleteReportFrame(id)));
   }
 
-  await Promise.all(apiCalls);
+  // await Promise.all(apiCalls);
   await getReportFrame();
   scene.deleteId = [];
   scene.saveStatus = true;
@@ -435,15 +427,15 @@ const chooseImg = async (event) => {
       // 3MB转换成字节数
       message.error("文件大小超过3MB，请选择小于等于3MB的文件!");
     } else {
-      const frameThumbnail: any = await toFormData(selectedFile);
+      // const frameThumbnail: any = await toFormData(selectedFile);
       const newScene = {
         ...scene.list[scene.idx],
-        frameThumbnail,
+        // frameThumbnail,
         animationId: scene.animation?.id,
         type: "img",
         layersConfig: JSON.stringify([
           {
-            imgUrl: frameThumbnail,
+            // imgUrl: frameThumbnail,
             isShow: true,
             type: "img",
           },

@@ -1,13 +1,4 @@
-<!--
- * @Author: cxj 1481240653@qq.com
- * @Date: 2024-04-09 17:34:47
- * @LastEditors: cxj 1481240653@qq.com
- * @LastEditTime: 2024-06-26 17:15:41
- * @FilePath: \hby\src\components\AlertDialog\index.vue
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
 <template>
-  <!-- 设置时间 | 导览名称 -->
   <div class="form-dialog">
     <div class="flex-center title">
       <img

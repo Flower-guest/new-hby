@@ -14,11 +14,12 @@ const dTilesOption = {
 
 export default class ModelAndImage {
   map3d: any;
-  tiles3dLayer: any; //加载3dTiles
+  tiles3dLayer: any[]; //加载3dTiles
   xyzLayer: any; //添加影像图层
 
   constructor(map3d) {
     this.map3d = map3d;
+    this.tiles3dLayer = [];
   }
 
   // 添加影像图层
@@ -42,10 +43,9 @@ export default class ModelAndImage {
 
   // 添加3DTile模型
   addCesium3DTileSet(obj) {
-    this.delete3DTile();
-    this.tiles3dLayer = new window.mars3d.layer.TilesetLayer({
-      id:obj.id,
-      name: obj.name,
+    const tiles3dLayers = new window.mars3d.layer.TilesetLayer({
+      id: obj.id,
+      name: obj?.name,
       url: obj.url,
       position: obj?.Pos
         ? {
@@ -55,20 +55,22 @@ export default class ModelAndImage {
           alt_offset: obj.Pos.alt_offset,
         }
         : { alt: obj?.alt ?? 100 },
-      maximumScreenSpaceError: obj?.max ?? 1,
+      maximumScreenSpaceError: obj?.max ?? 16,
       scale: obj?.Pos ? obj.Pos.sca : 1,
       ...dTilesOption,
       enableDebugWireframe: false, // 是否可以进行三角网的切换显示
       flyTo: obj?.flyTo ?? false,
       shadows: window.Cesium.ShadowMode.ENABLED
     });
-    this.map3d.addLayer(this.tiles3dLayer);
+    this.map3d.addLayer(tiles3dLayers);
+    this.tiles3dLayer.push(tiles3dLayers);
   }
-  // 删除模型
+  // 删除所有模型
   delete3DTile() {
-    if (this.tiles3dLayer) {
-      this.map3d.removeLayer(this.tiles3dLayer, true);
-      this.tiles3dLayer = null;
+    if (this.tiles3dLayer.length > 0) {
+      this.tiles3dLayer.forEach((item) => {
+        this.map3d.removeLayer(item, true);
+      })
     }
   }
 }

@@ -24,14 +24,14 @@
           :key="item.id"
           @click="handelGuide(item)"
         >
-          <img
+          <!-- <img
             loading="lazy"
             v-show="report.isSave"
             class="w-10px h-10px absolute top-0 right-0"
             @click.stop="handelDelete(item.id)"
             :src="getAssets('gb3.png')"
             alt="关闭"
-          />
+          /> -->
           <img
             loading="lazy"
             class="w-68px h-68px origin-center"
@@ -92,16 +92,16 @@
 
 <script setup lang="ts">
 import Detail from "./detail.vue";
-import {
-  getPageReportAnimation,
-  postCreateReportAnimation,
-  deleteReportAnimation,
-  getPageReportFrame,
-  putUpdateReportAnimation,
-} from "@/service/api/report";
+// import {
+//   getPageReportAnimation,
+//   postCreateReportAnimation,
+//   deleteReportAnimation,
+//   getPageReportFrame,
+//   putUpdateReportAnimation,
+// } from "@/service/api/report";
 import { guideFormDialog } from "./const";
 import { Report } from "./types";
-import { ElMessageBox } from "element-plus";
+// import { ElMessageBox } from "element-plus";
 import { type UseDraggableReturn, VueDraggable } from "vue-draggable-plus";
 import { getAssets } from "@/utils";
 
@@ -153,7 +153,7 @@ watch(
 
 let animationData: any;
 const init = async () => {
-  animationData = await getPageReportAnimation(report.reportId);
+  // animationData = await getPageReportAnimation(report.reportId);
   report.total = animationData.length - report.pageSize;
   updateReportList();
 };
@@ -183,7 +183,7 @@ const handelGuide = async (item) => {
     report.show = false;
     report.detailShow = true;
   } else {
-    const frames = await getPageReportFrame(item.id);
+    // const frames = await getPageReportFrame(item.id);
     await playAnimationFrames(frames);
   }
 };
@@ -260,18 +260,18 @@ const adjustCameraView = async (frame) => {
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // 删除动画
-const handelDelete = (id: number) => {
-  ElMessageBox.confirm("确定删除该动画?", "", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning",
-    customClass: "reset-login",
-  }).then(async () => {
-    await deleteReportAnimation(id);
-    message.success("删除成功");
-    init();
-  });
-};
+// const handelDelete = (id: number) => {
+//   ElMessageBox.confirm("确定删除该动画?", "", {
+//     confirmButtonText: "确定",
+//     cancelButtonText: "取消",
+//     type: "warning",
+//     customClass: "reset-login",
+//   }).then(async () => {
+//     // await deleteReportAnimation(id);
+//     message.success("删除成功");
+//     init();
+//   });
+// };
 
 // 编辑功能
 const handelEdit = () => {
@@ -291,14 +291,14 @@ const handelFormEvent = (type: string) => {
       break;
     case "save":
       // 创建汇报动画
-      postCreateReportAnimation({
-        reportId: report.reportId,
-        animationName: formDialog.form.animationName,
-      }).then(() => {
-        formDialog.show = false;
-        init();
-        handelFormEvent("reset"); //将时间重置
-      });
+      // postCreateReportAnimation({
+      //   reportId: report.reportId,
+      //   animationName: formDialog.form.animationName,
+      // }).then(() => {
+      //   formDialog.show = false;
+      //   init();
+      //   handelFormEvent("reset"); //将时间重置
+      // });
       break;
     case "close":
       formDialog.show = false;
@@ -308,10 +308,10 @@ const handelFormEvent = (type: string) => {
 
 // 更新动画
 const updateAnimation = async () => {
-  const apiList = report.list.map((item, animationOrder) =>
-    putUpdateReportAnimation({ ...item, animationOrder })
-  );
-  await Promise.all(apiList);
+  // const apiList = report.list.map((item, animationOrder) =>
+  //   putUpdateReportAnimation({ ...item, animationOrder })
+  // );
+  // await Promise.all(apiList);
   init();
   message.success("保存成功");
 };

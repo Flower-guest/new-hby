@@ -16,7 +16,6 @@ export default class DivAndBillboard {
     this.graphicDivLayer = new window.mars3d.layer.GraphicLayer();
     this.map3d.addLayer(this.graphicDivLayer);
     this.clusterLayer = null;
-    // this.addClusterLayer();
   }
   // 添加点位点击事件
   initClick(ck) {
@@ -75,45 +74,47 @@ export default class DivAndBillboard {
             <div class="icon">
               <img loading="lazy" src="${imgUrl}" alt="花博园图标" />
             </div>
-            <img loading="lazy" ${option.vrLink ? 'class="qj-icon"' : 'class="hidden qj-icon"'}  src="${qjUrl}" alt="花博园图标" />
+            <img loading="lazy" ${option.attr.vrLink ? 'class="qj-icon"' : 'class="hidden"'}  src="${qjUrl}" alt="花博园图标" />
           </div>
         </div>`,
         horizontalOrigin: window.Cesium.HorizontalOrigin.CENTER,
         verticalOrigin: window.Cesium.VerticalOrigin.BOTTOM,
         clampToGround: true,
-        distanceDisplayCondition: new window.Cesium.DistanceDisplayCondition(0, option?.diFar ?? Number.MAX_VALUE), // 按视距距离显示
+        distanceDisplayCondition: new window.Cesium.DistanceDisplayCondition(0, option?.diFar ?? 50000), // 按视距距离显示
       },
       attr: option?.attr ?? null,
     });
     this.graphicDivLayer.addGraphic(graphic);
   }
   //添加聚合点
-  addClusterLayer() {
+  addClusterLayer(id) {
+    console.log(id);
     if (!this.clusterLayer) {
       this.clusterLayer = new window.mars3d.layer.GraphicLayer({
-        // clustering: {
-        //   enabled: true,
-        //   pixelRange: 20,
-        //   center: { lat: 31.639275, lng: 117.388877, alt: 52574.8, heading: 339.3, pitch: -65 },
-        // },
+        clustering: {
+          enabled: true,
+          pixelRange: 5,
+        },
+        id,
+        name:id
       });
       this.map3d.addLayer(this.clusterLayer);
-      // this.clusterLayer.on(window.mars3d.EventType.click, (event) => {
-      //   if (event.graphic?.attr) {
-      //     this.ck(event);
-      //   } else {
-      //     const p = window.mars3d.LngLatPoint.fromCartesian(event.cartesian);
-      //     this.map3d.flyToPoint([p.lng, p.lat], {
-      //       radius: p.alt + 150,
-      //       duration: 2,
-      //     });
-      //   }
-      // });
+      this.clusterLayer.on(window.mars3d.EventType.click, (event) => {
+        if (event.graphic?.attr) {
+          this.ck(event);
+        } else {
+          const p = window.mars3d.LngLatPoint.fromCartesian(event.cartesian);
+          this.map3d.flyToPoint([p.lng, p.lat], {
+            radius: p.alt + 150,
+            duration: 2,
+          });
+        }
+      });
     }
   }
   //添加基本点位
   addBillboard(option) {
-    // this.addClusterLayer();
+    this.addClusterLayer(option.name);
     const graphic = new window.mars3d.graphic.BillboardPrimitive({
       position: option.position,
       attr: option?.attr ?? null,
@@ -124,18 +125,18 @@ export default class DivAndBillboard {
         height: 52,
         horizontalOrigin: window.Cesium.HorizontalOrigin.CENTER,
         verticalOrigin: window.Cesium.VerticalOrigin.BOTTOM,
-        distanceDisplayCondition: new window.Cesium.DistanceDisplayCondition(0, option?.diFar ?? Number.MAX_VALUE),
+        distanceDisplayCondition: new window.Cesium.DistanceDisplayCondition(0, option?.diFar ?? 50000),
         visibleDepth: option.isCluster, //是否被遮挡
         clampToGround: !option.isCluster,
         label: option?.text ? this.addLabel(option) : {},
       },
     });
     // 判断是否需要点聚合
-    // if (option.isCluster) {
-    // this.clusterLayer.addGraphic(graphic);
-    // } else {
-    this.graphicDivLayer.addGraphic(graphic);
-    // }
+    if (option.isCluster) {
+      this.clusterLayer.addGraphic(graphic);
+    } else {
+      this.graphicDivLayer.addGraphic(graphic);
+    }
   }
   //添加文本元素
   addLabel(option: any) {
@@ -155,7 +156,7 @@ export default class DivAndBillboard {
       backgroundColor: "#041822",
       backgroundOpacity: 0.7,
       backgroundPadding: new window.Cesium.Cartesian2(16, 4),
-      distanceDisplayCondition: new window.Cesium.DistanceDisplayCondition(0, option?.diFar ?? Number.MAX_VALUE),
+      distanceDisplayCondition: new window.Cesium.DistanceDisplayCondition(0, option?.diFar ?? 50000),
       clampToGround: true, //是否贴地
       visibleDepth: false, //是否被遮挡
     };
@@ -164,7 +165,7 @@ export default class DivAndBillboard {
     return {
       offsetX: this.countOffsetX(option.text, imgUrl),
       offsetY: -4,
-      distanceDisplayCondition: new window.Cesium.DistanceDisplayCondition(0, option?.diFar ?? Number.MAX_VALUE), // 按视距距离显示
+      distanceDisplayCondition: new window.Cesium.DistanceDisplayCondition(0, option?.diFar ?? 50000), // 按视距距离显示
       clampToGround: true,
     }
   }
@@ -198,10 +199,7 @@ export default class DivAndBillboard {
       });
     }
     // 删除点聚合数据
-    if (this.clusterLayer) {
-      this.clusterLayer.remove();
-      this.clusterLayer = null;
-    }
+    this.deleteClusterGraphic();
     setTimeout(() => {
       this.loading?.close();
     }, 0);
@@ -214,6 +212,13 @@ export default class DivAndBillboard {
         // 如果isForever为true则不删除
         !layer.isForever && this.graphicDivLayer.removeGraphic(layer)
       });
+    }
+  }
+
+  deleteClusterGraphic() {
+    if (this.clusterLayer) {
+      this.clusterLayer.remove();
+      this.clusterLayer = null;
     }
   }
 }

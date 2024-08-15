@@ -66,7 +66,7 @@ class Request {
           ElMessage.error(msg);
           return Promise.reject("error");
         } else if (code === resultCode) {
-          return data.data || data;
+          return data?.data ? data.data || data : data;
         }
       },
       (err) => {
@@ -127,7 +127,9 @@ class Request {
   handleAuthorized() {
     if (!isRelogin.show) {
       isRelogin.show = true;
-      removeAPPId(); removeProjectData(); removeDict();
+      removeAPPId();
+      removeProjectData();
+      removeDict();
       removeToken();
       isRelogin.show = false;
       window.location.reload();

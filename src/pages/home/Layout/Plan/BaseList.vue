@@ -2,15 +2,12 @@
   <!-- tab栏与标题 -->
   <div class="mt-20px">
     <div class="main-title flex-between">
-      <span>{{ props.tabTitle }}</span>
+      <span>{{ data.title }}</span>
       <div class="flex justify-end">
-        <template v-for="i in props.tabValue" :key="i.val">
-          <div
-            v-hasPermi="[i.permissions]"
-            class="cursor-pointer ml-23px text-14px"
-            @click="infoClick(i)"
-          >
-            <div :class="{ activeItem: tabActive && tabActive.val == i.val }">
+        <template v-for="i in state.tabList" :key="i.val">
+          <!-- <div @click="infoClick(i)"> -->
+          <div class="cursor-pointer mt-6px ml-23px text-14px">
+            <div :class="{ activeItem: state.activeTab == i.val }">
               {{ i.label }}
             </div>
           </div>
@@ -19,12 +16,9 @@
     </div>
   </div>
   <!-- 列表 -->
-  <div class="list" :style="{ height: props.height + 'px' }">
+  <div class="list" :style="{ height: state.height + 'px' }">
     <!-- 搜索 -->
-    <div
-      class="my-18px text-[#DAE3E6] text-16px flex-between-center search"
-      v-show="props.showSearch"
-    >
+    <div class="my-18px text-[#DAE3E6] text-16px flex-between-center search">
       <el-select
         v-model="state.status"
         placeholder="全部"
@@ -33,12 +27,12 @@
         @change="screen"
         :clearable="true"
       >
-        <!-- <el-option
-          v-for="item in getDictOptions(props.dictType)"
+        <el-option
+          v-for="item in state.searchOpt"
           :key="item.value"
           :label="item.label"
-          :value="parseInt(item.value)"
-        /> -->
+          :value="item.value"
+        />
       </el-select>
 
       <div class="flex-center w-full">
@@ -119,9 +113,9 @@
   </div>
   <!--分页按钮  -->
   <div class="flex-between-center mt-20px">
-    <span class="text-[#fff] text-16px font-extrabold">{{
+    <!-- <span class="text-[#fff] text-16px font-extrabold">{{
       props.pagination.label + "：" + state.total + props.pagination.unit
-    }}</span>
+    }}</span> -->
     <el-pagination
       background
       layout="slot"
@@ -150,28 +144,39 @@
 <script lang="ts" setup>
 import IconDropDown from "@/components/IconDropDown/index.vue";
 import useGetListInfo from "@/hooks/useGetListInfo";
+import { tab } from "@/const/layout";
 // import useListClick from "@/hooks/useListClick";
 import { getAssets } from "@/utils";
 // import { getUser } from "@/utils/auth";
 // import { getDictOptions, getDictLabel } from "@/utils/dict";
 
-interface detailProps {
-  height?: number; //列表高度
-  tabValue: any; //tab栏数据
-  tabTitle: string; //tab栏标题
-  showSearch?: boolean; //是否显示搜索框
-  pagination?: any; //分页统计的文本内容
-  dictType: string; //字典类型
-}
-const props = withDefaults(defineProps<detailProps>(), {
-  height: 300,
-  showSearch: true,
-  pagination: { label: "统计数量", unit: "项" },
+const props = defineProps<{ data: any }>();
+const state = reactive<any>({
+  tabList: [],
+  activeTab: "",
+  height: 0,
+  status: null,
+  searchOpt: [],
+  name:"",
+});
+
+onMounted(() => {
+  state.tabList = tab[props.data.data_model].list;
+  state.height = tab[props.data.data_model].height;
+  state.searchOpt = tab[props.data.data_model].option;
+  state.activeTab = state.tabList[0].val;
+  console.log(props.data, state.tabList);
 });
 
 // 获取数据与当前点击tab栏
-const { tabActive, state, infoClick, changePage, search, screen } =
-  useGetListInfo();
+const {
+  // tabActive,
+  // state,
+  // infoClick,
+  changePage,
+  search,
+  screen,
+} = useGetListInfo();
 // const { listClick } = useListClick();
 
 const clickItem = ref<number>();
@@ -198,19 +203,10 @@ const changeTableInfo = async (i) => {
   clickItem.value = i.id;
   // emit("change", res);
 };
-
-onMounted(() => {
-  // 过滤掉没有权限的tab栏
-  // const permissions = getUser().permissions;
-  // const filteredTab = props?.tabValue.filter((item) => {
-    // return permissions.includes(item.permissions);
-  // });
-  // 过滤掉的tab栏 默认第一个
-  // infoClick(filteredTab?.[0]);
-});
 </script>
 
 <style lang="less" scoped>
+@import "./com.less";
 .list {
   width: 100%;
   overflow: hidden;
@@ -228,6 +224,7 @@ onMounted(() => {
     padding: 8px;
     box-sizing: border-box;
     display: flex;
+
     .state {
       position: absolute;
       top: -1px;
@@ -241,6 +238,7 @@ onMounted(() => {
     }
   }
 }
+
 .list::-webkit-scrollbar {
   width: 5px;
 }
@@ -254,9 +252,11 @@ onMounted(() => {
   background: #5c9099;
   border-radius: 10px;
 }
+
 .color85 {
   color: rgba(218, 229, 230, 0.85);
 }
+
 .pagination-btn {
   padding: 6px 18px;
   background: #143944;
@@ -283,8 +283,10 @@ onMounted(() => {
     }
   }
 }
+
 :deep(.el-select) {
   width: 150px;
+
   .el-select__wrapper {
     background: #0d2124;
     box-shadow: inset 0px 0px 5px -1px #92efff;

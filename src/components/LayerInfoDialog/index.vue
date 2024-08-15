@@ -20,16 +20,16 @@
         />
       </div>
       <div class="carousel">
-        <el-carousel class="w-100%" height="auto" indicator-position="none">
+        <el-carousel class="w-full h-full" indicator-position="none">
           <el-carousel-item
             class="carousel_item"
-            v-for="j in detail?.thumbnail"
+            v-for="j in detail?.images"
             :key="j"
           >
             <div class="relative w-100% h-100%">
               <img
-                loading="lazy"
                 class="w-100% h-100%"
+                loading="lazy"
                 :src="getServeImg(j)"
                 alt="轮播图"
               />
@@ -62,14 +62,14 @@
           <el-tabs v-model="activeName" class="demo-tab">
             <el-tab-pane label="基本信息" name="first">
               <div
-                v-if="info?.projectIntroduction"
+                v-if="detail?.introduce"
                 class="jj com max-h-270px"
-                v-html="info?.projectIntroduction"
+                v-html="detail?.introduce"
               ></div>
               <div class="text-[#F2FEFF] text-18px my-14px">招商合作</div>
               <div class="py-15px pl-13px com">
-                <div class="mb-14px">联系人:{{ info?.contactUnit }}</div>
-                <div>联系电话: {{ info?.telephone }}</div>
+                <div class="mb-14px">联系人:{{ detail?.contact_person }}</div>
+                <div>联系电话: {{ detail?.telephone }}</div>
               </div>
             </el-tab-pane>
           </el-tabs>
@@ -80,7 +80,7 @@
         <div class="my-10px px-10px text-[#333] text-16px">
           <el-tabs v-model="activeName" class="demo-tab">
             <el-tab-pane label="基本信息" name="first">
-              <div v-show="detail?.remark" class="mt-14px jj com">
+              <div v-show="detail?.remark" class="mt-14px jj com h-360px">
                 {{ detail?.remark }}
               </div>
             </el-tab-pane>
@@ -144,21 +144,36 @@ const videoOptions = reactive<any>({
   source: "",
   id: "layerInfo-Video",
 });
+
 // 传参实时监听变化与赋值
 watch(
   () => props.info,
-  (newValue) => {
-    getDataByTypeId(newValue);
+  (newValue, oldValue) => {
+    if (newValue && newValue !== oldValue) {
+      getDataByTypeId(newValue);
+    }
   }
 );
 
 const getDataByTypeId = async (val) => {
-  const res = await GetDataByTypeId({ type: val.dataType, id: val.dataValue });
-  detail.value = res;
-  if (detail.value?.videoUrl) {
-    videoOptions.source = detail.value.videoUrl;
-    videoOptions.isLive =
-      detail.value?.videoUrl.indexOf(".mp4") != -1 ? false : true;
+  try {
+    detail.value = await GetDataByTypeId({
+      type: val.dataType,
+      id: val.dataValue,
+    });
+    if (val.dataType === "hotspot") {
+      detail.value.images = detail.value.images.split(",");
+    } else {
+      detail.value.images = detail.value.thumbnail.split(",");
+      detail.value.panoLink = detail.value.panoramic_link;
+    }
+    if (detail.value?.videoUrl) {
+      videoOptions.source = detail.value.videoUrl;
+      videoOptions.isLive =
+        detail.value?.videoUrl.indexOf(".mp4") != -1 ? false : true;
+    }
+  } catch (error) {
+    console.error("Failed to fetch data:", error);
   }
 };
 
@@ -185,7 +200,6 @@ const updateShow = () => {
   background-color: #fff;
   background: url("@/assets/img/info-bg.png") no-repeat;
   background-size: 100% 100%;
-
   .qj_icon {
     position: absolute;
     width: 57px;
@@ -196,7 +210,6 @@ const updateShow = () => {
   .el-divider {
     margin: 0;
   }
-
   .carousel {
     padding: 30px 20px 0;
     height: 260px;
@@ -244,7 +257,6 @@ const updateShow = () => {
     }
     .jj {
       line-height: 26px;
-      height: 360px;
       overflow: hidden;
       overflow-y: auto;
     }

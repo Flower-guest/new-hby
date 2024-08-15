@@ -1,6 +1,6 @@
 import router from "@/router";
 import { isRelogin } from "@/service/request";
-import { getAccessToken, getGid } from "@/utils/auth";
+import { getAccessToken, getGid, getDict } from "@/utils/auth";
 import { useDictStore, useProjectStore } from "@/store";
 
 // 路由不重定向白名单
@@ -13,7 +13,7 @@ router.beforeEach(async (to, from, next) => {
     } else {
       // 加载字典
       const dictStore = useDictStore();
-      if (!dictStore.getIsSetDict) {
+      if (!getDict()) {
         await dictStore.setDictMap();
       }
       // 用户信息

@@ -1,6 +1,6 @@
 <template>
   <!-- 场景切换选项 -->
-  <div class="menuBox" v-if="toolMenus">
+  <div class="menuBox">
     <template v-if="props.eventType === 'checkboxGroup'">
       <div class="checkbox" v-for="(menu, idx) in toolMenus" :key="idx">
         <el-checkbox
@@ -73,6 +73,7 @@ const checkAll = ref<boolean>(false); //全部
 const isIndeterminate = ref<boolean>(false); //中间状态
 
 const jsonUrl: { url: string; id: number }[] = []; //外链json数据数组
+const tilesUrl: { url: string; id: number }[] = []; //3dtiles数据数组
 const sceneCamera: { camera: any; id: number }[] = []; //场景视角
 
 const { measure, mapEvent, modelAndImage, split } = window.cesiumInit;
@@ -89,19 +90,20 @@ const initData = () => {
     } else {
       processItem(menu);
     }
+  });
 
-    const layers = window.cesiumInit.map3d.getLayersByAttr(menu.id, "id");
+  cities.forEach((id) => {
+    const layers = window.cesiumInit.map3d.getLayersByAttr(id, "id");
     const divLayer =
       window.cesiumInit.divGraphic.graphicDivLayer.getGraphicsByAttr(
-        menu.id,
+        id,
         "name"
       );
 
-    if (layers.length > 1 && divLayer.length > 1) {
-      checkedCities.value.push(menu.id);
+    if (layers.length > 0 || divLayer.length > 0) {
+      checkedCities.value.push(id);
     }
   });
-
   checkAll.value = checkedCities.value.length === cities.length;
   isIndeterminate.value =
     checkedCities.value.length > 0 &&
@@ -118,6 +120,7 @@ const processGroupMenu = (menu) => {
     });
   } else {
     menu.cities.push(menu.id);
+    cities.push(menu.id);
   }
 };
 const processItem = (item) => {
@@ -126,6 +129,9 @@ const processItem = (item) => {
   }
   if (item.scene_camera) {
     sceneCamera.push({ camera: item.scene_camera, id: item.id });
+  }
+  if (item.menu_type === "tilesLoading" && item.url) {
+    tilesUrl.push({ url: item.url, id: item.id });
   }
   cities.push(item.id);
 };
@@ -151,9 +157,7 @@ const menuClick = async (val, billArr: number[] = []) => {
 
   switch (val.menu_type) {
     case "measureMaster":
-      measure.measureStart(val.handle_type, () => {
-        activeBtn.value = 0;
-      });
+      measure.measureStart(val.handle_type, () => (activeBtn.value = 0));
       break;
     case "tilesLoading":
       modelAndImage.addCesium3DTileSet(val);
@@ -214,10 +218,13 @@ const handleChildlistChange = (menu, value: string[]) => {
 // 加载数据与对应的视角
 const formatData = (value) => {
   const jsonResult = jsonUrl.filter((item) => value.includes(item.id)); //外链地址
-  const cameraResult =
-    sceneCamera.find((item) => value.includes(item.id)) || null; //视角
-  mapEvent.flyToPoint(cameraResult);
-  useLoadData(value, jsonResult);
+  const tilesResult = tilesUrl.filter((item) => value.includes(item.id)); //模型地址
+  const cameraResult: any = value.reduceRight(
+    (match, id) => match ?? sceneCamera.find((camera) => camera.id === id),
+    null
+  );//取所选值的最后一个视角值
+  mapEvent.flyToPoint(cameraResult?.camera);
+  useLoadData(value, jsonResult, tilesResult);
 };
 
 /**

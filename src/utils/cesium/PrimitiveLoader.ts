@@ -3,7 +3,7 @@ import { simplify } from "@turf/turf";
 const comStyleOptions = (option) => {
   return {
     distanceDisplayCondition: option?.di ?? false, //是否按视距显示
-    distanceDisplayCondition_far: option?.diFar ?? Number.MAX_VALUE, //最大距离
+    distanceDisplayCondition_far: option?.diFar ?? 50000, //最大距离
     distanceDisplayCondition_near: option?.diNear ?? 0, //最小距离
     clampToGround: option?.clamp ?? true,
   };
@@ -52,7 +52,7 @@ export default class PrimitiveLoader {
       data: option.data, //geojson格式规范数据对象，与url二选一即可。
       format: this.simplifyGeoJSON,
       mask: option.mask || false, // 标识是否绘制区域边界的反选遮罩层
-      symbol: option.symbol || null, // 标识是否绘制区域边界的反选遮罩层
+      symbol: option.symbol || null,
       zIndex: option?.zIndex ?? 1,
       flyTo: option?.flyTo ?? false,
     });

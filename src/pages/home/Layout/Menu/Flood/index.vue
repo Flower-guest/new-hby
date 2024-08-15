@@ -5,7 +5,6 @@
       ref="ruleFormRef"
       style="max-width: 600px"
       :model="formState"
-      label-width="auto"
       class="demo-ruleForm"
       status-icon
     >

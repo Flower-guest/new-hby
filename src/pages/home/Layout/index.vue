@@ -1,13 +1,12 @@
 <template>
   <!-- 顶部标题 -->
-  <!-- <div class="top" v-show="activeTab !== 'dronePatrol'"> -->
-  <div class="top">
+  <div class="top" v-show="!isDrone">
     <!-- 头部左侧标题、切换按钮 -->
     <div class="top_l">
       <div class="title">{{ projectInfo.name }}</div>
       <div class="flex flex-1 text-[#DAE5E6]">
         <template v-for="(i, idx) in btnTool" :key="i.id">
-          <template v-if="getDictName(i.menu_type) !== 'moreTab'">
+          <template v-if="i.menu_type !== 'moreTab'">
             <div
               class="top_btn top-hover"
               :class="{ active: activeTabId == i.id }"
@@ -45,7 +44,7 @@
       <div class="top_info">
         <div
           class="flex-center text-14px cursor-pointer"
-          @click="manyClick('http://121.37.31.18/login?redirect=/index')"
+          @click="manyClick({ url: 'https://dash.yzbhe.com/index/login.html' })"
         >
           <img
             loading="lazy"
@@ -74,47 +73,34 @@
     </div>
   </div>
   <!-- 左侧面板 -->
-  <!-- <div v-if="activeTab !== 'dronePatrol'">
-    <component
-      :is="tabs[activeTab]"
-      :rural-info="ruralInfo"
-      :tab-value="tabValue"
-      :data-count="dataCount"
-      v-bind="attrs"
-    />
-  </div> -->
-  <!-- <div v-else> -->
-  <!-- 无人机巡逻 -->
-  <!-- <AsyncDronePatrol v-bind="attrs" @back-home="tabClick(btnTool[0].path)" />
-  </div> -->
+  <div v-show="!isDrone">
+    <!-- 左侧面板 -->
+    <AsyncPlan :plan-data="planData" />
+  </div>
+  <div v-show="isDrone">
+    <!-- 无人机巡逻 -->
+    <AsyncDronePatrol @back-home="tabClick(btnTool[0].id)" />
+  </div>
 
   <!-- 右侧菜单 -->
   <AsyncMenu :menu="tabMenus" />
 </template>
 
 <script setup lang="ts">
-// import { tab, statistics } from "@/const/layout";
-// import { getVillageInfoPage } from "@/service/api/admin-api";
+import { GetGisBtnByMeun } from "@/service/api";
 import { getAssets, formMenuData } from "@/utils";
-import { getDictName } from "@/utils/dict";
 import { getGid } from "@/utils/auth";
 import { useProjectStore } from "@/store";
 import { ElMessageBox } from "element-plus";
 
-// const introduce = defineAsyncComponent(() => import("./Plan/introduce.vue"));
-// const develop = defineAsyncComponent(() => import("./Plan/develop.vue"));
-// const personInfo = defineAsyncComponent(() => import("./Plan/personInfo.vue"));
-// const projectHub = defineAsyncComponent(() => import("./Plan/projectHub.vue"));
 const AsyncMenu = defineAsyncComponent(() => import("./Menu/index.vue"));
-// const AsyncDronePatrol = defineAsyncComponent(
-//   () => import("./DronePatrol/index.vue")
-// );
-
-// const tabs = { introduce, develop, personInfo, projectHub }; //动态组件切换
+const AsyncPlan = defineAsyncComponent(() => import("./Plan/index.vue"));
+const AsyncDronePatrol = defineAsyncComponent(
+  () => import("./DronePatrol/index.vue")
+);
 
 const { loginOut, projectInfo, menu } = useProjectStore();
 const { replace } = useRouter();
-// const attrs = useAttrs();
 
 const { tab, tabMenu } = formMenuData(menu);
 const years = useDateFormat(useNow(), "YYYY.MM.DD"); //年份
@@ -122,28 +108,25 @@ const time = useDateFormat(useNow(), "HH:mm:ss"); //时间
 
 const btnTool = ref<any>(); //按钮菜单
 const tabMenus = ref<any>(""); //菜单
-// const tabValue = ref<any>(); //咨询tab切换数据
 const activeTabId = ref<any>(""); //默认页面
+const isDrone = ref<boolean>(false); //是否无人机
 const showMany = ref<boolean>(false); //展示更多
-// const dataCount = ref<any>(); //数据统计
-// const ruralInfo = ref<any>(); //村庄信息
+const planData = ref<any>();
 
 const init = async () => {
   btnTool.value = tab; //根据权限给定tab值
-  // const village: any = await getVillageInfoPage();
-  // ruralInfo.value = village[0];
   tabClick(btnTool.value[0].id);
 };
 
-// const emit = defineEmits(["changeTab", "changeVr"]);
+const emit = defineEmits(["closeLayer", "changeVr"]);
 // 页面切换按钮点击
-const tabClick = (id: string | number) => {
+const tabClick = async (id: number, type = "") => {
   activeTabId.value = id; //本次点击页面
   tabMenus.value = tabMenu[id];
-  // tabValue.value = tab[type]; //获取指定页面tab切换数据
-  // dataCount.value = statistics[type];
-  // emit("changeTab"); //关闭弹窗
-  // emit("changeVr", type === "dronePatrol" ? false : true); //关闭vr按钮
+  planData.value = await GetGisBtnByMeun(id);
+  isDrone.value = type === "drone" ? true : false;
+  emit("closeLayer"); //关闭弹窗
+  emit("changeVr", type === "drone" ? false : true); //关闭vr按钮
 };
 
 // 更多点击功能
@@ -152,7 +135,7 @@ const manyClick = (item: any) => {
   if (item.url) {
     window.open(item.url, "_blank");
   } else {
-    tabClick(item.id);
+    tabClick(item.id, item.menu_type);
   }
 };
 

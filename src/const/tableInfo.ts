@@ -148,20 +148,20 @@ export const xmTabPanes = [
 ];
 export const xmList = {
   baseInfo: [
-    { label: "项目名称", prop: "projectName" },
-    { label: "规划面积", prop: "planArea" },
-    { label: "项目预算", prop: "projectBudget" },
-    { label: "项目状态", prop: "projectStatus", type: "built_project_status" },
+    { label: "项目名称", prop: "name" },
+    { label: "规划面积", prop: "plan_area" },
+    { label: "项目预算", prop: "project_budget" },
+    { label: "项目状态", prop: "project_status", type: "dict" },
     {
       label: "合作方式",
-      prop: "cooperationMethods",
-      type: "cooperation_methods",
+      prop: "cooperation_methods",
+      type: "dict",
     },
-    { label: "发布时间", prop: "projectRegistrationDate", type: "time" },
-    { label: "联系人", prop: "contactPerson" },
-    { label: "职位", prop: "jobPosition" },
-    { label: "联系单位", prop: "contactUnit" },
+    { label: "发布时间", prop: "createtime", type: "time" },
+    { label: "联系人", prop: "contact_person" },
+    { label: "职位", prop: "job_position" },
+    { label: "联系单位", prop: "contact_unit" },
     { label: "联系电话", prop: "telephone" },
   ],
-  mercInfo: [{ label: "描述", prop: "projectIntroduction", type: "html" }],
+  mercInfo: [{ label: "描述", prop: "introduce", type: "html" }],
 };

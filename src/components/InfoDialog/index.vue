@@ -1,11 +1,3 @@
-<!--
- * @Author: cxj 1481240653@qq.com
- * @Date: 2023-12-13 19:19:20
- * @LastEditors: cxj 1481240653@qq.com
- * @LastEditTime: 2024-07-11 16:45:32
- * @FilePath: \hby\src\components\InfoDialog\index.vue
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
 <template>
   <div class="info" :style="{ width: props.width + 'rem' }">
     <div class="info_title">
@@ -15,17 +7,7 @@
         :src="getAssets('icon_jt.png')"
         alt="icon"
       />
-      <img
-        loading="lazy"
-        class="w-88px h-31px"
-        v-if="props?.title"
-        :style="{
-          width: props.imgWidth + 'px',
-          height: props.imgHeight + 'px',
-        }"
-        :src="getAssets(`text-${props.title}.png`)"
-        alt="标题"
-      />
+      {{ props?.title }}
     </div>
     <div>
       <slot name="infoMain"></slot>

@@ -5,7 +5,6 @@
       ref="formStateRef"
       style="max-width: 600px"
       :model="formState"
-      label-width="auto"
       class="demo-formState"
       status-icon
     >

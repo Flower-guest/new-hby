@@ -1,5 +1,5 @@
 import Request from "./request";
-import { getAccessToken } from "@/utils/auth";
+import { getAccessToken, getJFKey } from "@/utils/auth";
 
 const timeOut = 30000;
 
@@ -17,16 +17,22 @@ const http = new Request({
   },
 });
 
-const AIRequest = (baseURL) =>
-  new Request({
-    baseURL,
-    timeout: 240000,
-    interceptors: {
-      requestInterceptor: (config) => {
-        return config;
-      },
+// 积分接口
+const jfRequest = new Request({
+  baseURL: import.meta.env.VITE_BASE_JF_URL + "",
+  timeout: timeOut,
+  interceptors: {
+    requestInterceptor: (config) => {
+      const token = getJFKey();
+      if (token) {
+        config.headers = {
+          Authorization: `Bearer ${token}`,
+        };
+      }
+      return config;
     },
-  });
+  },
+});
 
 const DroneRequest = new Request({
   baseURL: import.meta.env.VITE_BASE_DRONE_URL + "",
@@ -44,6 +50,6 @@ const DroneRequest = new Request({
   },
 });
 
-export { AIRequest, DroneRequest };
+export { DroneRequest, jfRequest };
 
 export default http;

@@ -11,16 +11,6 @@ export function maskNumber(type: string, number: string): string {
   return maskNumber;
 }
 
-// 时间戳转年月日
-export function formatDateFromTimestamp(timestamp: number): string {
-  if (!timestamp) return "";
-  const date = new Date(timestamp);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 // 取对象指定字段数据 data:对象 value:指定字段 返回数组
 export function extractTypes(data, val) {
   const types: any = [];
@@ -71,7 +61,7 @@ export const formMenuData = (menus) => {
   const tab: any = [], tabMenu: any = {};
   menus.forEach((menu) => {
     tab.push(menu);
-    if (menu.menu_type === '19' && menu.childlist.length > 0) {
+    if (menu.menu_type === "moreTab" && menu.childlist.length > 0) {
       menu.childlist.forEach((childList) => {
         tabMenu[childList.id] = childList.childlist
       })

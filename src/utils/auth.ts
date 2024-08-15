@@ -1,6 +1,6 @@
 import localCache from "./cache";
 
-const ONLY_KEY = "hby";
+const ONLY_KEY = "saas";
 
 const AccessTokenKey = ONLY_KEY + "ACCESS_TOKEN";
 
@@ -114,4 +114,32 @@ export const getGid = () => {
 
 export const setGid = (gid: any) => {
   localCache.setCache(GidKey, gid);
+};
+
+// ========== 积分相关 ==========
+const JFKey = ONLY_KEY + "JF";
+const JFInfoKey = ONLY_KEY + "JF_INFO";
+
+export const getJFKey = () => {
+  return localCache.getCache(JFKey);
+};
+
+export const setJFKey = (username: string) => {
+  localCache.setCache(JFKey, username);
+};
+
+export const removeJFKey = () => {
+  localCache.deleteCache(JFKey);
+};
+
+export const getJFInfoKey = () => {
+  return localCache.getCache(JFInfoKey);
+};
+
+export const setJFInfoKey = (data: any) => {
+  localCache.setCache(JFInfoKey, data);
+};
+
+export const removeJFInfoKey = () => {
+  localCache.deleteCache(JFInfoKey);
 };

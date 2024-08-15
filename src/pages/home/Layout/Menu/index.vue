@@ -44,7 +44,7 @@
       /> -->
       <AsyncOperateMenu
         ref="menuRef"
-        v-show="menuItem.childlist.length > 0 && isActiveMenu(menuItem.id)"
+        v-if="menuItem.childlist.length > 0 && isActiveMenu(menuItem.id)"
         :event-type="menuItem.event_type"
         :tool-menu="menuItem.childlist"
       />
@@ -60,6 +60,8 @@
   <AsyncPlanZone ref="zoneRef" />
   <!-- 招商导览功能 -->
   <!-- <AsyncReport v-show="report.show" :report-id="report.id" /> -->
+  <!-- 积分表单 -->
+  <AsyncIntegral v-model:show="comVisible.integral" />
 </template>
 
 <script setup lang="ts">
@@ -77,32 +79,33 @@ const AsyncOperateMenu = defineAsyncComponent(
 const AsyncPlanZone = defineAsyncComponent(
   () => import("./PlanZone/index.vue")
 );
+const AsyncIntegral = defineAsyncComponent(
+  () => import("./Integral/index.vue")
+);
 // const AsyncReport = defineAsyncComponent(
 //   () => import("./components/invGuide/index.vue")
 // );
 
-const props = defineProps<{
-  menu: any;
-}>();
+const props = defineProps<{ menu: any }>();
 
 // const menuRef = ref<InstanceType<typeof AsyncOperateMenu> | null>();
 const zoneRef = ref<InstanceType<typeof AsyncPlanZone> | null>();
 
+const menuVal = ref<any>(props.menu);
+const activeMenu = ref<any>(); //当前点击的按钮
 // 组件显隐
 const comVisible = reactive({
   locSearch: false,
   sunlightCheck: false,
   floodCheck: false,
+  integral: false,
 });
-const activeMenu = ref<any>(); //当前点击的按钮
 
 // 招商导览组件
 // const report = reactive<any>({
 //   id: 0,
 //   show: false,
 // });
-
-const menuVal = ref<any>(props.menu);
 
 //监听页面切换执行对应函数
 watch(
@@ -118,67 +121,76 @@ watch(
 
 // 当顶部按钮点击切换页面时触发的事件
 const tabChange = () => {
-  //进行数据删除
   window.cesiumInit.primitiveLoader.deleteFn();
   window.cesiumInit.divGraphic.deleteDivGraphic();
-  comVisible.locSearch = false; // 隐藏点位搜索框
-  comVisible.sunlightCheck = false; // 隐藏点位搜索框
-  comVisible.floodCheck = false; // 隐藏点位搜索框
+  Object.keys(comVisible).forEach((key) => (comVisible[key] = false));
   zoneRef.value?.resetActive(); //重置分区状态
 };
 
 // 下拉菜单样式
-const xlStyle = computed(() => (item: any) => {
-  const res = activeMenu.value === item.id ? true : false;
-  return {
-    width: "14px",
-    height: "10px",
-    opacity: item.childlist.length > 0 ? 1 : 0,
-    transform: res ? "rotate(0deg)" : "rotate(-90deg)",
-  };
-});
+const xlStyle = computed(() => (item: any) => ({
+  width: "14px",
+  height: "10px",
+  opacity: item.childlist.length > 0 ? 1 : 0,
+  transform: activeMenu.value === item.id ? "rotate(0deg)" : "rotate(-90deg)",
+}));
 
-const isActiveMenu = computed(() => (id: string) => activeMenu.value === id);
+const isActiveMenu = (id: string) => activeMenu.value === id;
 
 // tool点击功能
-const handleToolClick = (i) => {
-  activeMenu.value = activeMenu.value == i.id ? "" : i.id; //点击相同取消选中状态
-
-  if (i.menu_type !== "dualViewSync" || !activeMenu.value)
+const handleToolClick = (item) => {
+  activeMenu.value = activeMenu.value == item.id ? "" : item.id; //点击相同取消选中状态
+  if (item.menu_type !== "dualViewSync" || !activeMenu.value) {
     window.cesiumInit.split.destroyControl();
+  }
+  zoneRef.value?.resetActive();
+  handleMenuTypeAction(item);
+  // switch (i.menu_type) {
+  //   case "rankScores": //积分排行榜
+  //     break;
+  //   case "modelFlattener": //模型压平
+  //     break;
+  //   case "animateInsight": //汇报动画
+  //     break;
+  // }
+};
 
-  switch (i.menu_type) {
-    case "locSearch": //位置搜索
-    case "sunlightCheck": //日照分析
-    case "floodCheck": //淹没分析
-      comVisible[i.menu_type] = !comVisible[i.menu_type];
-      break;
-    case "panoPoints": //全景点位
-    case "designCases": //全景设计比对点位
-    case "planZoning": //规划分区
-      if (activeMenu.value) {
-        useLoadData([i.id], [{ url: i.jsonurl, id: i.id }]);
-        window.cesiumInit.mapEvent.flyToPoint(i.scene_camera);
+const handleMenuTypeAction = (item: any) => {
+  const actions: Record<string, Function> = {
+    locSearch: () => toggleVisibility("locSearch"), //位置搜索
+    sunlightCheck: () => toggleVisibility("sunlightCheck"), //日照分析
+    floodCheck: () => toggleVisibility("floodCheck"), //淹没分析
+    panoPoints: () => handleMapLayer(item), //全景点位
+    designCases: () => handleMapLayer(item), //全景设计比对点位
+    planZoning: () => handlePlanZoning(item), //规划分区
+    rankScores: () => (comVisible.integral = !comVisible.integral), //积分排行榜
+    dualViewSync: () => {
+      if (activeMenu.value) window.cesiumInit.split.createControl(item); //双屏比对
+    },
+  };
+  actions[item.menu_type]?.();
+};
 
-        if (i.menu_type === "planZoning") zoneRef.value?.loadData(i.id);
-      } else {
-        window.cesiumInit.mapEvent.removeLayer(i.id, "id");
-        window.cesiumInit.divGraphic.removeLayer(i.id);
-
-        if (i.menu_type === "planZoning") zoneRef.value?.resetActive(); //重置分区状态
-      }
-      break;
-    case "rankScores": //积分排行榜
-      break;
-    case "dualViewSync": //双屏比对
-      if (activeMenu.value) {
-        window.cesiumInit.split.createControl(i);
-      }
-      break;
-    case "modelFlattener": //模型压平
-      break;
-    case "animateInsight": //汇报动画
-      break;
+// 组件显隐
+const toggleVisibility = (key: keyof typeof comVisible) => {
+  comVisible[key] = !comVisible[key];
+};
+// 操作地图图层
+const handleMapLayer = (item: any) => {
+  if (activeMenu.value) {
+    useLoadData([item.id], [{ url: item.jsonurl, id: item.id }]);
+    window.cesiumInit.mapEvent.flyToPoint(item.scene_camera);
+  } else {
+    window.cesiumInit.mapEvent.removeLayer(item.id, "id");
+    window.cesiumInit.divGraphic.removeLayer(item.id);
+  }
+};
+// 规划分析
+const handlePlanZoning = (item: any) => {
+  handleMapLayer(item);
+  if (activeMenu.value) {
+    zoneRef.value?.loadData(item.id);
+    zoneRef.value?.setPlanZoneImg(item.icon);
   }
 };
 

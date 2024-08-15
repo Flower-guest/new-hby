@@ -18,12 +18,11 @@
       </div>
     </div>
     <!-- 主要页面 -->
-    <!-- <AsyncLayout
-      @change-tab="showTable = false"
-      @change="changeTabInfo"
-      @change-vr="showVR = $event"
-    /> -->
-    <AsyncLayout />
+    <AsyncLayout
+      @close-layer="visible.layer = false"
+      @change-vr="visible.vr = $event"
+    />
+    <!-- <AsyncLayout @change="handelLayer" /> -->
     <!-- 表单弹窗 -->
     <LayerInfoDialog
       :info="layerInfo"

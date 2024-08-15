@@ -12,7 +12,7 @@ class MapEvent {
   }
   // 飞到指定点位
   flyToPoint(option) {
-    option && this.viewer.flyToPoint([option.lng, option.lat], {
+    option?.lng && this.viewer.flyToPoint([option.lng, option.lat], {
       ...option,
       radius: option.alt, // 距离目标点的距离
       lock: option?.lock ?? true, //是否是trackedEntity锁定视角状态
@@ -49,6 +49,9 @@ class MapEvent {
     const layerArr = this.viewer.getLayersByAttr(attrValue, attrName);
     if (layerArr.length > 0) {
       layerArr.map(layer => {
+        if (layer.options?.clustering) {
+          window.cesiumInit.divGraphic.deleteClusterGraphic();
+        }
         // 如果isForever为true则不删除
         !layer.isForever && this.viewer.removeLayer(layer)
       });

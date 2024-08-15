@@ -1,9 +1,9 @@
-import {
-  getInvestmentProjects,
-  getAssetManagement,
-  getBuiltProjects,
-  getBuildingManagement,
-} from "@/service/api/admin-api";
+// import {
+//   getInvestmentProjects,
+//   getAssetManagement,
+//   getBuiltProjects,
+//   getBuildingManagement,
+// } from "@/service/api/admin-api";
 
 const useGetListInfo = () => {
   const tabActive = ref<any>();
@@ -71,30 +71,30 @@ const useGetListInfo = () => {
     let res;
     switch (val) {
       case "zsxm": // 获取招商项目列表
-        res = await getInvestmentProjects(state);
+        // res = await getInvestmentProjects(state);
         break;
       case "jsxm": // 获取建设项目列表
-        res = await getBuiltProjects(state);
+        // res = await getBuiltProjects(state);
         break;
       case "fwzs": //房屋招商
-        res = await getBuildingManagement({
-          ...state,
-          rentalIntention: 1,
-          assetUsage: "20",
-        });
+        // res = await getBuildingManagement({
+        //   ...state,
+        //   rentalIntention: 1,
+        //   assetUsage: "20",
+        // });
         break;
       case "qtzs": //其它招商
-        res = await getAssetManagement({
-          ...state,
-          rentalIntention: 1,
-          assetUsage: "20",
-        });
+        // res = await getAssetManagement({
+        //   ...state,
+        //   rentalIntention: 1,
+        //   assetUsage: "20",
+        // });
         break;
       case "fwzc": //房屋资产
-        res = await getBuildingManagement(state);
+        // res = await getBuildingManagement(state);
         break;
       case "qtzc": //其它资产
-        res = await getAssetManagement(state);
+        // res = await getAssetManagement(state);
         break;
     }
     state.total = res.total;

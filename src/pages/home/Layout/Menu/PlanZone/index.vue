@@ -5,7 +5,7 @@
   >
     <template v-for="i in btnList" :key="i.id">
       <div
-        @click="handleListClick(i, 'fAct', i)"
+        @click="handleListClick(i, 'fAct')"
         class="zone"
         :class="{ active: active.fAct === i.id }"
       >
@@ -14,7 +14,7 @@
           <template v-for="item in i.childlist" :key="item.id">
             <div
               :class="{ 'item-active': active.sAct === item.id }"
-              @click.stop="handleListClick(item, 'sAct', i)"
+              @click.stop="handleListClick(item, 'sAct')"
             >
               {{ item.name }}
             </div>
@@ -66,9 +66,10 @@ const resetActive = () => {
   cities = [];
 };
 
-const handleListClick = async (item: any, type: string, fItem = null) => {
-  console.log(fItem);
+let image;
+const handleListClick = async (item: any, type: string) => {
   active[type] = item.id;
+  if (item.image) image = item.image;
   // 默认选中第一个子项
   if (type === "fAct" && item.childlist.length > 0) {
     handleListClick(item.childlist[0], "sAct");
@@ -78,9 +79,12 @@ const handleListClick = async (item: any, type: string, fItem = null) => {
     useLoadData([item.id], [{ url: item.jsonurl, id: item.id }]);
     window.cesiumInit.mapEvent.flyToPoint(item.scene_camera);
   });
-
   // 切换图层
-  store.setPlanZoneImg(item.image);
+  setPlanZoneImg(image);
+};
+
+const setPlanZoneImg = (image) => {
+  store.setPlanZoneImg(image);
 };
 
 /**
@@ -102,6 +106,7 @@ const deleteGraphic = (checkArray, ck: any = null) => {
 defineExpose({
   loadData,
   resetActive,
+  setPlanZoneImg,
 });
 </script>
 

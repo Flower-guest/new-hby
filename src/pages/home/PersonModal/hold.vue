@@ -2,7 +2,7 @@
   <div class="modal" v-show="attrs.show">
     <div class="box">
       <div class="title">
-        {{ state.villagerData?.[0]?.groupName }}
+        {{ attrs.group }}
         <img
           loading="lazy"
           @click="updateShow"

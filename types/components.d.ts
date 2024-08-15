@@ -9,7 +9,6 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AlertDialog: typeof import('./../src/components/AlertDialog/index.vue')['default']
     AutoScroll: typeof import('./../src/components/AutoScroll/index.vue')['default']
-    ConTable: typeof import('./../src/components/ConTable/index.vue')['default']
     CountTo: typeof import('./../src/components/CountTo/index.vue')['default']
     CustomTable: typeof import('./../src/components/CustomTable/index.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -39,10 +38,7 @@ declare module '@vue/runtime-core' {
     LayerInfoDialog: typeof import('./../src/components/LayerInfoDialog/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    RowTab: typeof import('./../src/components/Tab/rowTab.vue')['default']
     Tab: typeof import('./../src/components/Tab/index.vue')['default']
-    Table: typeof import('./../src/components/Table/index.vue')['default']
-    TableInfo: typeof import('./../src/components/TableInfo/index.vue')['default']
     VideoPlayer: typeof import('./../src/components/VideoPlayer/index.vue')['default']
     WebViewPage: typeof import('./../src/components/WebViewPage/index.vue')['default']
   }

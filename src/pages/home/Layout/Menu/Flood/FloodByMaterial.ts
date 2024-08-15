@@ -9,19 +9,26 @@ class FloodByMaterial {
   constructor() {
     this.viewer = window.cesiumInit.map3d;
     this.eventTarget = new window.mars3d.BaseClass()
-    // 基于地球材质，可以多个区域
-    this.floodByMaterial = new window.mars3d.thing.FloodByMaterial({
-      color: "rgba(0, 123, 230, 0.5)" // 淹没颜色
-    })
-    this.viewer.addThing(this.floodByMaterial)
+    this.floodByMaterial = null;
+  }
 
-    this.floodByMaterial.on(window.mars3d.EventType.change, (e) => {
-      const height = e.height
-      this.eventTarget.fire("heightChange", { height })
-    })
+  create() {
+    if (!this.floodByMaterial) {
+      // 基于地球材质，可以多个区域
+      this.floodByMaterial = new window.mars3d.thing.FloodByMaterial({
+        color: "rgba(0, 123, 230, 0.5)" // 淹没颜色
+      })
+      this.viewer.addThing(this.floodByMaterial)
+
+      this.floodByMaterial.on(window.mars3d.EventType.change, (e) => {
+        const height = e.height
+        this.eventTarget.fire("heightChange", { height })
+      })
+    }
   }
 
   async btnDraw(callback, floodColor) {
+    this.create();
     this.clearDraw()
 
     const graphic = await this.viewer.graphicLayer.startDraw({

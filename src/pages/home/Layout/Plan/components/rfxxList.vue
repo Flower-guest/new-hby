@@ -29,7 +29,7 @@
           <div class="filter-modal" v-show="sortModal">
             <div class="filter-main">
               <!-- 筛选点击 -->
-              <div v-for="j in filterList" :key="j.label">
+              <!-- <div v-for="j in filterList" :key="j.label">
                 <span v-show="j.type" class="filter-title">{{ j.label }}</span>
                 <div class="flex flex-wrap mt-7px">
                   <span
@@ -41,18 +41,18 @@
                     >{{ i.label }}</span
                   >
                 </div>
-              </div>
+              </div> -->
               <!-- 筛选下拉 -->
               <div class="flex justify-between">
-                <div
+                <!-- <div
                   class="flex flex-col"
                   v-for="x in filterSelect"
                   :key="x.label"
                 >
                   <div class="filter-title">
                     {{ x.label }}
-                  </div>
-                  <el-select-v2
+                  </div> -->
+                  <!-- <el-select-v2
                     class="w-190px"
                     popper-class="poppers"
                     v-model="state[x.prop]"
@@ -63,8 +63,8 @@
                     :options="getDictOptions(x.type)"
                     multiple
                     clearable
-                  />
-                </div>
+                  /> -->
+                <!-- </div> -->
               </div>
             </div>
             <div class="line"></div>
@@ -77,12 +77,19 @@
       </div>
       <!-- 表单 -->
       <div class="w-100%">
-        <el-table
+        <!-- <el-table
           class="table"
           :data="state.tableData"
           :lazy="state.loading"
           :row-class-name="tableRowClassName"
           @row-click="showInfo"
+          :header-cell-class-name="'table-head'"
+        > -->
+        <el-table
+          class="table"
+          :data="state.tableData"
+          :lazy="state.loading"
+          :row-class-name="tableRowClassName"
           :header-cell-class-name="'table-head'"
         >
           <el-table-column
@@ -97,13 +104,13 @@
               }}</span>
             </template>
           </el-table-column>
-          <template v-for="i in rfxxTableList" :key="i.prop">
-            <el-table-column :align="'center'" :label="i.label">
+          <!-- <template v-for="i in rfxxTableList" :key="i.prop"> -->
+            <!-- <el-table-column :align="'center'" :label="i.label">
               <template #default="{ row }">
                 {{ i?.type ? getDictLabel(i.type, row[i.prop]) : row[i.prop] }}
               </template>
-            </el-table-column>
-          </template>
+            </el-table-column> -->
+          <!-- </template> -->
         </el-table>
       </div>
     </div>
@@ -135,12 +142,12 @@
 </template>
 
 <script lang="ts" setup>
-import IconDropDown from "@/components/IconDropDown/index.vue";
-import useListClick from "@/hooks/useListClick";
-import { getVillager } from "@/service/api/admin-api";
+// import IconDropDown from "@/components/IconDropDown/index.vue";
+// import useListClick from "@/hooks/useListClick";
+// import { getVillager } from "@/service/api/admin-api";
 import { getAssets } from "@/utils";
-import { getDictOptions, getDictLabel } from "@/utils/dict";
-import { rfxxTableList, rfxxFilterList, filterSelect } from "@/const/layout";
+// import { getDictOptions, getDictLabel } from "@/utils/dict";
+// import { rfxxTableList, rfxxFilterList, filterSelect } from "@/const/layout";
 
 interface detailProps {
   height?: number; //列表高度
@@ -150,9 +157,9 @@ const props = withDefaults(defineProps<detailProps>(), {
   height: 300,
 });
 
-const { listClick } = useListClick();
+// const { listClick } = useListClick();
 const sortModal = ref<any>(false); //是否显示筛选弹窗
-const filterList = ref<any>(rfxxFilterList);
+// const filterList = ref<any>(rfxxFilterList);
 
 const state = reactive<any>({
   loading: false,
@@ -182,9 +189,9 @@ const totalPage = computed(() => Math.ceil(state.total / state.pageSize));
 // 获取表单信息
 const getVillagers = async () => {
   if (sortModal.value) sortModal.value = false;
-  const res: any = await getVillager(state);
-  state.tableData = res.list.reverse();
-  state.total = res.total;
+  // const res: any = await getVillager(state);
+  // state.tableData = res.list.reverse();
+  // state.total = res.total;
 };
 
 // 分页按钮点击事件
@@ -200,13 +207,13 @@ const changePage = (val) => {
 };
 
 // 筛选弹窗的item点击事件
-const filterItemClick = (list, item) => {
-  state[list.prop] = item.label;
-  list.active = item.label;
-  if (list.prop == "gridName") {
-    filterList.value[1].type = item.value;
-  }
-};
+// const filterItemClick = (list, item) => {
+//   state[list.prop] = item.label;
+//   list.active = item.label;
+  // if (list.prop == "gridName") {
+  //   filterList.value[1].type = item.value;
+  // }
+// };
 
 // 筛选条件确认
 const filterSubmit = () => {
@@ -217,10 +224,10 @@ const filterSubmit = () => {
 // 筛选点击重置按钮
 const filterReset = () => {
   sortModal.value = false;
-  filterList.value[1].type = ""; //村组数据清空
-  filterList.value.filter((i) => {
-    i.active = "";
-  }); //点击状态清空
+  // filterList.value[1].type = ""; //村组数据清空
+  // filterList.value.filter((i) => {
+  //   i.active = "";
+  // }); //点击状态清空
   // 数据重置
   Object.assign(state, {
     loading: false,
@@ -238,21 +245,21 @@ const filterReset = () => {
 };
 
 // 列表点击事件展示弹窗信息
-const showInfo = async (row) => {
-  // 地图展示点位删除
-  window.cesiumInit.divGraphic.deleteDivGraphic();
-  // 地图展示线面删除
-  window.cesiumInit.primitiveLoader.deleteFn();
+// const showInfo = async (row) => {
+//   // 地图展示点位删除
+//   window.cesiumInit.divGraphic.deleteDivGraphic();
+//   // 地图展示线面删除
+//   window.cesiumInit.primitiveLoader.deleteFn();
 
-  await listClick(
-    {
-      val: "rfxx",
-      label: "人房信息",
-      dateName: "人房信息",
-    },
-    row
-  );
-};
+  // await listClick(
+  //   {
+  //     val: "rfxx",
+  //     label: "人房信息",
+  //     dateName: "人房信息",
+  //   },
+  //   row
+  // );
+// };
 
 getVillagers();
 </script>

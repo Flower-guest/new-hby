@@ -61,7 +61,9 @@ export const useProjectStore = defineStore("project", {
     async loginOut() {
       await LoginOut();
       removeToken();
-      removeAPPId(); removeProjectData(); removeDict();
+      removeAPPId();
+      removeProjectData();
+      removeDict();
       this.resetState();
     },
 

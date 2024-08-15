@@ -21,7 +21,7 @@ interface detailProps {
 const props = withDefaults(defineProps<detailProps>(), {
   type: "arr",
   speed: 75,
-  scrollLength: 5,
+  scrollLength: 6,
 });
 
 //定时器初始化
