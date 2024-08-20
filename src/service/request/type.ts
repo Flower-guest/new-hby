@@ -10,4 +10,5 @@ export interface XJRequestInterceptors<T = AxiosResponse> {
 export interface RequestConfig<T = AxiosResponse> extends AxiosRequestConfig {
   interceptors?: XJRequestInterceptors<T>;
   showLoading?: boolean;
+  filterData?: boolean;
 }

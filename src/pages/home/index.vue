@@ -4,7 +4,7 @@
     <div id="cesiumContainer"></div>
     <!-- 全景与卫星切换 -->
     <div class="vr cursor-pointer" v-show="visible.vr">
-      <div class="relative w-168x h-100%" @click="showWebView(vrTotalUrl)">
+      <div class="relative w-168x h-100%" @click="showWebView()">
         <div class="qjdw">
           <img loading="lazy" :src="getAssets('icon-qjdw.png')" alt="icon" />
         </div>
@@ -52,6 +52,7 @@
 <script setup lang="ts">
 import { getAssets, getServeImg } from "@/utils";
 import CesiumInit from "@/utils/cesium/CesiumInit";
+import { getProject } from "@/utils/auth";
 
 // 异步子组件
 const AsyncLayout = defineAsyncComponent(() => import("./Layout/index.vue"));
@@ -74,7 +75,7 @@ const visible = reactive({
   vr: true,
 });
 
-let vrTotalUrl;
+let VRUrl;
 
 // billboard点击事件
 const billboardClick = async (event) => {
@@ -92,11 +93,11 @@ const billboardClick = async (event) => {
     case "asset": //资产点位
     case "investment": //招商点位
     case "build": //建设点位
-      handelLayer(attr);
+      handelInfoDialog(attr);
       break;
     case "houseInfoBuild": //人房信息楼栋
     case "houseInfoHold": //人房信息户
-      handelLayer(attr, "personInfo");
+      handelInfoDialog(attr, true, "personInfo");
       break;
   }
 };
@@ -112,31 +113,35 @@ const billboardClick = async (event) => {
 //   }
 // };
 
-// 图层点击事件 展示表单 info:点击的图层数据  type：事件类型
-const handelLayer = (info, type = "layerInfo") => {
+// 展示信息弹窗 info:点击的图层数据  type：事件类型
+const handelInfoDialog = (info, show = true, type = "layerInfo") => {
   switch (type) {
     case "layerInfo":
-      visible.layer = true;
+      visible.layer = show;
+      if (!info) return;
       layerInfo.value = info;
       break;
     case "personInfo":
-      visible.person = true;
+      visible.person = show;
       personInfo.value = info;
       break;
   }
 };
 
-const showWebView = (url) => {
-  pageUrl.value = url || vrTotalUrl;
+const showWebView = (url = "") => {
+  pageUrl.value = url || VRUrl;
   visible.webView = true;
 };
 
 onMounted(() => {
   window.cesiumInit = new CesiumInit();
   window.cesiumInit.loadData();
+  VRUrl = getProject().pano_link;
   // 添加billboard点击事件
   window.cesiumInit.divGraphic.initClick((event) => billboardClick(event));
 });
+
+provide("handelInfoDialog", handelInfoDialog);
 </script>
 
 <style lang="less" scoped>

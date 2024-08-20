@@ -3,7 +3,7 @@ import type { AxiosInstance } from "axios";
 import { XJRequestInterceptors, RequestConfig } from "./type";
 import { ElLoading, ElMessage } from "element-plus";
 import { LoadingInstance } from "element-plus/lib/components/loading/src/loading";
-import { errorCode, resultCode, ignoreMsgs, DEFAULT_LOADING } from "./config";
+import { errorCode, resultCode, ignoreMsgs, DEFAULT_LOADING, DEFAULT_FILTER } from "./config";
 import { removeToken, removeAPPId, removeProjectData, removeDict } from "@/utils/auth";
 
 // 是否显示重新登录
@@ -13,11 +13,13 @@ class Request {
   instance: AxiosInstance;
   interceptors?: XJRequestInterceptors;
   showLoading: boolean;
+  filterData: boolean;
   loading?: LoadingInstance; //是否有loading实例
 
   constructor(config: RequestConfig) {
     this.instance = axios.create(config);
     this.showLoading = config?.showLoading ?? DEFAULT_LOADING;
+    this.filterData = config?.filterData ?? DEFAULT_FILTER;
     this.interceptors = config.interceptors;
 
     // 实例独有的请求响应拦截
@@ -66,7 +68,11 @@ class Request {
           ElMessage.error(msg);
           return Promise.reject("error");
         } else if (code === resultCode) {
-          return data?.data ? data.data || data : data;
+          if (this.filterData) {
+            return data;
+          } else {
+            return data?.data ? data.data : data;
+          }
         }
       },
       (err) => {
@@ -93,6 +99,7 @@ class Request {
       }
       // 独有的请求加载
       this.showLoading = config?.showLoading ?? DEFAULT_LOADING;
+      this.filterData = config?.filterData ?? DEFAULT_FILTER;
       this.instance
         .request<any, T>(config)
         .then((res) => {

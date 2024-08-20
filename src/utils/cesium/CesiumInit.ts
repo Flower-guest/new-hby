@@ -75,7 +75,12 @@ class CesiumInit {
       this.map3d.addControl(locationBar)
     }
 
-    await workerFormat({ '-1': { jsondata: init_json } }, [-1], true);
+    await workerFormat({
+      type: 'loadMenuData',
+      data: { '-1': { jsondata: init_json } },
+      checkMenuArr: [-1],
+      isForever: true
+    });
 
     if (orthophoto) {
       const orthoPhoto = orthophoto.split(",");

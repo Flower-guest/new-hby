@@ -37,9 +37,9 @@
                 loading="lazy"
                 class="qj_icon"
                 alt="全景图标"
-                v-show="detail?.panoLink"
+                v-show="detail?.pano_link"
                 :src="getAssets('icon-qj.png')"
-                @click="vrClick(detail?.panoLink)"
+                @click="vrClick(detail?.pano_link)"
               />
             </div>
           </el-carousel-item>
@@ -165,7 +165,7 @@ const getDataByTypeId = async (val) => {
       detail.value.images = detail.value.images.split(",");
     } else {
       detail.value.images = detail.value.thumbnail.split(",");
-      detail.value.panoLink = detail.value.panoramic_link;
+      detail.value.pano_link = detail.value.panoramic_link;
     }
     if (detail.value?.videoUrl) {
       videoOptions.source = detail.value.videoUrl;

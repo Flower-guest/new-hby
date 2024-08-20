@@ -60,15 +60,22 @@ export const isDecimal = (num, length) => {
 export const formMenuData = (menus) => {
   const tab: any = [], tabMenu: any = {};
   menus.forEach((menu) => {
-    tab.push(menu);
     if (menu.menu_type === "moreTab" && menu.childlist.length > 0) {
+      menu['show'] = false; //是否显示下拉
       menu.childlist.forEach((childList) => {
         tabMenu[childList.id] = childList.childlist
       })
     } else {
       tabMenu[menu.id] = menu.childlist
     }
+    tab.push(menu);
   })
 
   return { tab, tabMenu }
 }
+
+// 将{"94": "运营维护","95": "项目实施"};这种格式的对象转成{ key: "94", value: "运营维护" }形式数组
+export const toObjArray = (obj) => Object.entries(obj).map(([key, value]) => ({
+  key,
+  value
+}));

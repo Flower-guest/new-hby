@@ -24,11 +24,13 @@
         </div>
         <div>
           <template v-for="i in planState.list.slice(1)" :key="i.id">
+            <!-- 资讯 -->
             <AsyncInformation
               v-if="i.data_model === 'Information'"
               :data="i"
               @show-dialog="showDialog"
             />
+            <!-- 列表 -->
             <AsyncBaseList
               v-else-if="
                 i.data_model === 'invesList' ||
@@ -37,6 +39,7 @@
               "
               :data="i"
             />
+            <!-- 数据统计、轮播图、简介信息 -->
             <AsyncBaseInfo
               v-else-if="i.data_model !== 'name'"
               :plan-data="i"
@@ -55,7 +58,7 @@
       alt="icon"
     />
   </div>
-  <div class="overlay_dialog" v-show="planState.visible">
+  <div class="overlay_dialog" v-if="planState.visible">
     <div class="overlayMain">
       <img
         loading="lazy"

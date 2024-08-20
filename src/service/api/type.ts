@@ -1,3 +1,4 @@
+// 获取gis项基础信息
 export type BasicInfoResponse = {
   name: string,
   subtitle: string,
@@ -5,17 +6,18 @@ export type BasicInfoResponse = {
   guest: number,
 }
 
+// 登录
 export type LoginResponse = { token: string, appid: number };
 
-export type ProjectList = ProjectListItem[];
-
-type ProjectListItem = {
+// 获取GIS项目列表
+export type ProjectListItem = {
   id: number,
   name: string,
   subtitle: string,
   thumb_path: string
 }
 
+// 初始化GIS项目
 export type UserInterface = {
   name: string,
   subtitle: string,
@@ -99,3 +101,45 @@ export type ArticleById = ArticleChannelList & {
   content: string,
 }
 
+// 招商项目、建设项目list
+export type ProjectType = {
+  statusList: {
+    id: string
+  },
+  typeList: {
+    id: string
+  }
+}
+
+// 招商项目、建设项目list
+export type ProjectListQuery = { name: string, category: number, status: number, page: number, size: number }
+
+export type ProjectListResponse = {
+  total: number,
+  data: any[]
+}
+
+export type ProjectDetailsResponse = {
+    id: number,
+    mid: number,
+    name: string,
+    type: number,
+    project_type: number,
+    project_status: number,
+    plan_area: number,
+    cooperation_methods: number,
+    project_budget: number,
+    contact_unit: string,
+    contact_person: string,
+    job_position: string,
+    telephone: number,
+    thumbnail: string,
+    panoramic_link: string,
+    project_scope_file: string,
+    introduce:string,
+    gis_menu_id: number,
+    gis_id: number,
+    gis_spot: string,
+    map_elements_name: string,
+    project_registration_date: string
+}

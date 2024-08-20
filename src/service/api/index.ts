@@ -15,7 +15,7 @@ export const PostGuestLogin = (gid) => http.post<ResultType.LoginResponse>({ dat
 export const GetMenuTreeList = (pid) => http.get<ResultType.WebMenuResponse[]>({ data: { IDIP: 242, gid: getGid(), pid } });
 
 // 获取GIS项目列表
-export const GetProjectList = () => http.get<ResultType.ProjectList>({ data: { IDIP: 244 } });
+export const GetProjectList = () => http.get<ResultType.ProjectListItem[]>({ data: { IDIP: 244 } });
 
 // 初始化GIS项目
 export const GetUserInterface = (gid) => http.get<ResultType.UserInterface>({ data: { IDIP: 245, gid } });
@@ -37,3 +37,21 @@ export const GetArticleListByChannel = (category: number) => http.get<ResultType
 
 // 获得资讯内容
 export const GetArticleById = (id: number) => http.get<ResultType.ArticleById[]>({ data: { IDIP: 188, id } });
+
+// 获取招商项目类型，状态
+export const GetInvestmentType = () => http.get<ResultType.ProjectType>({ data: { IDIP: 195 } });
+
+// 获得招商项目列表
+export const GetInvestmentList = (data: ResultType.ProjectListQuery) => http.get<ResultType.ProjectListResponse>({ data: { IDIP: 194, ...data }, filterData: true });
+
+// 获得招商项目详情
+export const GetInvestmentById = (id: number) => http.get<ResultType.ProjectDetailsResponse>({ data: { IDIP: 193, id } });
+
+//  获取建设项目类型，状态
+export const GetBuiltProjectType = () => http.get<ResultType.ProjectType>({ data: { IDIP: 183 } });
+
+// 获得建设项目列表
+export const GetBuiltProjectList = (data: ResultType.ProjectListQuery) => http.get<ResultType.ProjectListResponse>({ data: { IDIP: 182, ...data }, filterData: true });
+
+// 获得建设项目详情
+export const GetBuiltProjectById = (id: number) => http.get<ResultType.ProjectDetailsResponse>({ data: { IDIP: 181, id } });

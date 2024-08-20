@@ -4,11 +4,13 @@
     <div class="main-title flex-between">
       <span>{{ data.title }}</span>
       <div class="flex justify-end">
-        <template v-for="i in state.tabList" :key="i.val">
-          <!-- <div @click="infoClick(i)"> -->
-          <div class="cursor-pointer mt-6px ml-23px text-14px">
-            <div :class="{ activeItem: state.activeTab == i.val }">
-              {{ i.label }}
+        <template v-for="i in state.typeList" :key="i.key">
+          <div
+            @click="changeType(i.key)"
+            class="cursor-pointer mt-6px ml-23px text-14px"
+          >
+            <div :class="{ activeItem: state.category == i.key }">
+              {{ i.value }}
             </div>
           </div>
         </template>
@@ -24,14 +26,14 @@
         placeholder="全部"
         popper-class="poppers"
         :suffix-icon="IconDropDown"
-        @change="screen"
+        @change="changeStatus"
         :clearable="true"
       >
         <el-option
-          v-for="item in state.searchOpt"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
+          v-for="item in state.statusList"
+          :key="item.key"
+          :label="item.value"
+          :value="item.key"
         />
       </el-select>
 
@@ -61,68 +63,59 @@
       </div>
     </div>
     <!-- 列表item -->
-    <div
-      class="item"
-      :style="{
-        backgroundColor: clickItem == i.id ? 'rgba(51,116,128,0.8)' : '',
-      }"
-      v-for="i in state.infoList"
-      :key="i.id"
-      @click="changeTableInfo(i)"
-    >
-      <img
-        loading="lazy"
-        class="w-80px h-80px mr-8px"
-        alt="缩略图"
-        :src="
-          i?.thumbnail?.[0] ??
-          i?.assetImage?.[0] ??
-          'https://console.launchst.cn/upload/2/file/6a7dc472aa9b53b793f784c22d70f7cd.jpg'
-        "
-      />
-      <div class="flex flex-col text-12px">
-        <span class="text-18px text-[#fff] mb-6px">{{
-          i?.projectName ?? i?.assetName ?? i?.titleInvestment
-        }}</span>
-        <span class="color85">登记时间：{{ i.projectRegistrationDate }}</span>
-        <span class="color85 my-5px"
-          >占地面积：{{ i?.planArea ?? i.occupyingArea }}㎡</span
-        >
-        <div class="color85">
-          价格：<span class="text-[#BFC52E]"
-            >{{ i?.projectBudget ?? i?.listingPrice ?? "面议"
-            }}{{ i?.projectBudget || i?.listingPrice ? "元" : "" }}</span
+    <template v-if="state.list.length > 0">
+      <div
+        class="item"
+        :style="{
+          backgroundColor: clickItem == i.id ? 'rgba(51,116,128,0.8)' : '',
+        }"
+        v-for="i in state.list"
+        :key="i.id"
+        @click="getById(i.id)"
+      >
+        <img
+          loading="lazy"
+          class="w-80px h-80px mr-8px"
+          alt="缩略图"
+          :src="
+            getServeImg(i.thumbnail.split(',')[0]) ??
+            getAssets('default_thumb.jpg')
+          "
+        />
+        <div class="flex flex-col text-12px">
+          <span class="text-18px text-[#fff] mb-6px">{{ i.name }}</span>
+          <span class="color85"
+            >登记时间：{{ i.project_registration_date }}</span
           >
+          <span class="color85 my-5px">占地面积：{{ i.plan_area }}㎡</span>
+          <div class="color85">
+            价格：<span class="text-[#BFC52E]"
+              >{{ i.project_budget || "面议"
+              }}{{ i.project_budget ? "元" : "" }}</span
+            >
+          </div>
+        </div>
+        <div :class="['status', statusBg(i.project_status)]">
+          <span class="text-12px">{{ statusLabel(i.project_status) }}</span>
         </div>
       </div>
-      <!-- <div
-        v-if="i.projectStatus"
-        class="state"
-        :style="{
-          background:
-            getDictLabel(props.dictType, i.projectStatus) == '招商中'
-              ? '#BFC52E'
-              : '#2EAEC5',
-        }"
-      >
-        <span class="text-12px">{{
-          getDictLabel(props.dictType, i.projectStatus)
-        }}</span>
-      </div> -->
-    </div>
+    </template>
+    <template v-else>
+      <div class="text-center mt-100px">暂无数据</div>
+    </template>
   </div>
   <!--分页按钮  -->
   <div class="flex-between-center mt-20px">
-    <!-- <span class="text-[#fff] text-16px font-extrabold">{{
-      props.pagination.label + "：" + state.total + props.pagination.unit
-    }}</span> -->
+    <span class="text-[#fff] text-16px font-extrabold">{{
+      "总计：" + state.total
+    }}</span>
     <el-pagination
       background
       layout="slot"
       :hide-on-single-page="totalPage < 2"
       :total="state.total"
-      :page-size="state.pageSize"
-      :current-page="state.pageNo"
+      :page-size="state.size"
+      :current-page="state.page"
       @current-change="changePage"
     >
       <div key="1" class="flex">
@@ -130,7 +123,7 @@
           上一页
         </div>
         <div class="pagination-btn mx-15px">
-          <span class="text-[#C8F1F9]">{{ state.pageNo }}/</span
+          <span class="text-[#C8F1F9]">{{ state.page }}/</span
           ><span class="text-[#3E8999]">{{ totalPage }}</span>
         </div>
         <div class="pagination-btn" @click="changePage('next', totalPage)">
@@ -143,70 +136,185 @@
 
 <script lang="ts" setup>
 import IconDropDown from "@/components/IconDropDown/index.vue";
-import useGetListInfo from "@/hooks/useGetListInfo";
-import { tab } from "@/const/layout";
-// import useListClick from "@/hooks/useListClick";
-import { getAssets } from "@/utils";
-// import { getUser } from "@/utils/auth";
-// import { getDictOptions, getDictLabel } from "@/utils/dict";
+import {
+  GetInvestmentType,
+  GetInvestmentList,
+  GetInvestmentById,
+  GetBuiltProjectType,
+  GetBuiltProjectList,
+  GetBuiltProjectById,
+} from "@/service/api";
+import { workerFormat } from "@/hooks/useLoadData";
+import { getAssets, getServeImg, toObjArray } from "@/utils";
 
 const props = defineProps<{ data: any }>();
-const state = reactive<any>({
-  tabList: [],
-  activeTab: "",
-  height: 0,
-  status: null,
-  searchOpt: [],
-  name:"",
-});
-
-onMounted(() => {
-  state.tabList = tab[props.data.data_model].list;
-  state.height = tab[props.data.data_model].height;
-  state.searchOpt = tab[props.data.data_model].option;
-  state.activeTab = state.tabList[0].val;
-  console.log(props.data, state.tabList);
-});
-
-// 获取数据与当前点击tab栏
-const {
-  // tabActive,
-  // state,
-  // infoClick,
-  changePage,
-  search,
-  screen,
-} = useGetListInfo();
-// const { listClick } = useListClick();
-
+const type = props.data.data_model;
 const clickItem = ref<number>();
+const state = reactive<any>({
+  list: [],
+  statusList: [],
+  typeList: [],
+  category: 0, //当前激活的分类
+  height: 520,
+  status: "",
+  name: "",
+  page: 1,
+  size: 10,
+  total: 0, // 总条数
+});
+
+// 状态对应的文字
+const statusLabel = computed(() => (status) => {
+  return state.statusList.find((i: any) => i.key === status + "").value;
+});
+
+const statusMap = {
+  "1": "bg-[#2EAEC5]",
+  "2": "bg-[#BFC52E]",
+  "94": "bg-[#2EAEC5]",
+  "95": "bg-[#f75444]",
+  "96": "bg-[#18bc9c]",
+  "97": "bg-[#BFC52E]",
+};
+// 状态背景颜色
+const statusBg = computed(() => (status) => {
+  return statusMap[status];
+});
+
 // 总页数
-const totalPage = computed(() => Math.ceil(state.total / state.pageSize));
+const totalPage = computed(() => Math.ceil(state.total / state.size));
 
-const emit = defineEmits(["change"]);
+onMounted(async () => {
+  await getType();
+  await getList();
+});
 
-// 列表点击事件展示弹窗信息
-const changeTableInfo = async (i) => {
-  // 地图展示点位删除
-  window.cesiumInit.divGraphic.deleteDivGraphic();
-  // 地图展示线面删除
-  window.cesiumInit.primitiveLoader.deleteFn();
-  // 如果重复点击 取消点击状态 并关闭弹窗
-  if (i.id == clickItem.value) {
+// 获取状态与分类数据
+const getType = async () => {
+  try {
+    const typeRes =
+      type === "invesList"
+        ? await GetInvestmentType()
+        : await GetBuiltProjectType();
+    state.statusList = toObjArray(typeRes.statusList);
+    state.typeList = toObjArray(typeRes.typeList);
+    state.category = state.typeList[0].key;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// 获取列表
+const getList = async () => {
+  try {
+    const listRes =
+      type === "invesList"
+        ? await GetInvestmentList(state)
+        : await GetBuiltProjectList(state);
+    state.list = listRes.data;
+    state.total = listRes.total;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// 切换类型
+const changeType = async (key) => {
+  state.name = "";
+  state.status = "";
+  state.page = 1;
+  state.category = key;
+  getList();
+};
+
+// 状态修改
+const changeStatus = async (value) => {
+  state.status = value || "";
+  state.page = 1;
+  getList();
+};
+
+// 搜索
+const search = async () => {
+  state.page = 1;
+  getList();
+};
+
+// 分页按钮点击事件
+const changePage = (val, totalPage) => {
+  if (val == "prev") {
+    if (state.page < 2) return (state.page = 1);
+    state.page--;
+  } else {
+    if (state.page > totalPage - 1) return;
+    state.page++;
+  }
+  getList();
+};
+
+// 点击列表展示弹窗信息
+const handelInfoDialog: any = inject("handelInfoDialog");
+const getById = async (id: number) => {
+  // 清除地图上现有的点位和线面
+  const { divGraphic, primitiveLoader } = window.cesiumInit;
+  divGraphic.deleteDivGraphic();
+  primitiveLoader.deleteFn();
+
+  // 如果点击同一个项目，取消选中并关闭弹窗
+  if (id === clickItem.value) {
     clickItem.value = -1;
-    emit("change", { showTable: false });
+    handelInfoDialog("", false);
     return;
   }
 
-  // const res = await listClick(tabActive.value, i);
+  // 设置新的点击项
+  clickItem.value = id;
 
-  clickItem.value = i.id;
-  // emit("change", res);
+  // 根据类型设置数据类型和标记类型
+  const { dataType, markerType } = getDataTypeAndMarkerType(type);
+
+  // 显示弹窗信息
+  handelInfoDialog({ dataType, markerType, dataValue: id });
+
+  try {
+    const response = await fetchDataById(id, type);
+    if (response) {
+      const { gis_menu_id, gis_spot } = response;
+      workerFormat({
+        type: "loadListData",
+        menuId: gis_menu_id,
+        findIdArr: [gis_spot],
+      });
+    }
+  } catch (error) {
+    console.error("Failed to fetch data by ID:", error);
+  }
+};
+
+const getDataTypeAndMarkerType = (type: string) => {
+  switch (type) {
+    case "invesList":
+      return { dataType: "investment", markerType: "investment" };
+    case "assetsList":
+      return { dataType: "asset", markerType: "investment" };
+    default:
+      return { dataType: "builtproject", markerType: "build" };
+  }
+};
+
+const fetchDataById = async (id: number, type: string) => {
+  if (type === "invesList") {
+    return await GetInvestmentById(id);
+  } else if (type === "builtproject") {
+    return await GetBuiltProjectById(id);
+  }
+  return null;
 };
 </script>
 
 <style lang="less" scoped>
 @import "./com.less";
+
 .list {
   width: 100%;
   overflow: hidden;
@@ -221,11 +329,12 @@ const changeTableInfo = async (i) => {
     height: 96px;
     border-radius: 8px 8px 8px 8px;
     border: 1px solid #5c9099;
-    padding: 8px;
+    padding: 0 8px;
     box-sizing: border-box;
     display: flex;
+    align-items: center;
 
-    .state {
+    .status {
       position: absolute;
       top: -1px;
       right: -1px;

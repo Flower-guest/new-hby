@@ -14,9 +14,8 @@
             >
               {{ i.title }}
             </div>
-            <div v-if="idx < btnTool.length - 1" class="slash"></div>
           </template>
-          <div v-else class="top_btn relative" @click="showMany = !showMany">
+          <div v-else class="top_btn relative" @click="i.show = !i.show">
             <span class="text-24px">{{ i.title }}</span>
             <img
               loading="lazy"
@@ -24,7 +23,7 @@
               :src="getAssets('icon_xl.png')"
               alt="icon"
             />
-            <div v-show="showMany" class="many_main">
+            <div v-show="i.show" class="many_main">
               <template v-for="j in i.childlist" :key="j.id">
                 <div
                   class="mb-6px text-24px item relative"
@@ -36,6 +35,7 @@
               </template>
             </div>
           </div>
+          <div v-if="idx < btnTool.length - 1" class="slash"></div>
         </template>
       </div>
     </div>
@@ -110,7 +110,6 @@ const btnTool = ref<any>(); //按钮菜单
 const tabMenus = ref<any>(""); //菜单
 const activeTabId = ref<any>(""); //默认页面
 const isDrone = ref<boolean>(false); //是否无人机
-const showMany = ref<boolean>(false); //展示更多
 const planData = ref<any>();
 
 const init = async () => {

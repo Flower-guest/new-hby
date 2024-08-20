@@ -1,19 +1,46 @@
 self.onmessage = async (e) => {
   try {
-    const { data, checkMenuArr, dict, isForever } = e.data;
-    const formatMenuData = checkMenuArr.reduce((acc, id) => {
-      // 定义数据格式
-      acc[id] = {
-        lineAndPolygon: createFeatureCollection(id),
-        borderLine: createFeatureCollection(id),
-        marker: []
-      };
+    const { type, data, checkMenuArr, dict, isForever, menuId, findIdArr } = e.data;
 
-      const features = data[id]?.jsondata?.features || [];
-      features.forEach(val => processFeature(val, acc[id], dict, data[id], isForever, id));
+    let formatMenuData;
 
-      return acc;
-    }, {});
+    switch (type) {
+      case 'loadMenuData':
+        formatMenuData = checkMenuArr.reduce((acc, id) => {
+          // 定义数据格式
+          acc[id] = {
+            lineAndPolygon: createFeatureCollection(id),
+            borderLine: createFeatureCollection(id),
+            marker: []
+          };
+
+          const features = data[id]?.jsondata?.features || [];
+          features.forEach(val => processFeature(val, acc[id], dict, data[id], isForever, id));
+
+          return acc;
+        }, {});
+        break;
+      case 'loadListData':
+        const features = data[menuId]?.jsondata?.features || [];
+        const featuresByIdMap = new Map(features.map(feature => [
+          feature.properties.id,
+          feature
+        ]));
+
+        formatMenuData = {
+          lineAndPolygon: createFeatureCollection(menuId),
+          marker: []
+        }
+        findIdArr.forEach((id) => {
+          const foundFeature = featuresByIdMap.get(id) as { type: string, properties: any, geometry: any };
+          if (foundFeature.geometry.type === 'Point') {
+            handlePointFeature(foundFeature, formatMenuData, dict, data[menuId], false, id);
+          } else {
+            handleLineOrPolygonFeature(foundFeature, formatMenuData, dict);
+          }
+        })
+        break;
+    }
 
     self.postMessage({ status: 'success', data: formatMenuData });
   } catch (error: any) {
